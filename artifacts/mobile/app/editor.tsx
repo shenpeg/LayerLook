@@ -75,6 +75,7 @@ export default function EditorScreen() {
   const [layers, setLayers] = useState<Layer[]>([]);
   const [styleId, setStyleId] = useState<StyleId>("editorial");
   const [formatId, setFormatId] = useState<FormatId>("story");
+  const [showText, setShowText] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -92,6 +93,7 @@ export default function EditorScreen() {
       setLayers(existing.layers);
       setStyleId(existing.styleId);
       setFormatId(existing.formatId);
+      setShowText(existing.showText ?? false);
       setPhase("edit");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -117,11 +119,12 @@ export default function EditorScreen() {
       layers,
       styleId,
       formatId,
+      showText,
       thumbnailUri,
       createdAt: createdAtRef.current,
       updatedAt: Date.now(),
     }),
-    [backgroundUri, backgroundAspect, layers, styleId, formatId],
+    [backgroundUri, backgroundAspect, layers, styleId, formatId, showText],
   );
 
   // Auto-save edits (without re-capturing a thumbnail).
@@ -130,7 +133,7 @@ export default function EditorScreen() {
     const existing = getById(idRef.current);
     upsert(buildCollage(existing?.thumbnailUri));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layers, styleId, formatId, phase, backgroundUri]);
+  }, [layers, styleId, formatId, showText, phase, backgroundUri]);
 
   const pickPhotos = useCallback(async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -479,6 +482,7 @@ export default function EditorScreen() {
                 width={displaySize.w}
                 height={displaySize.h}
                 editable
+                showText={showText}
                 selectedId={selectedId}
                 onSelect={setSelectedId}
                 onChange={updateLayer}
@@ -500,6 +504,27 @@ export default function EditorScreen() {
             <View style={{ height: 12 }} />
             <FormatBar value={formatId} onChange={setFormatId} />
             <View style={styles.actionRow}>
+              <Pressable
+                onPress={() => setShowText((v) => !v)}
+                style={[
+                  styles.actionBtn,
+                  { backgroundColor: showText ? colors.primary : colors.secondary },
+                ]}
+              >
+                <Feather
+                  name="type"
+                  size={18}
+                  color={showText ? colors.primaryForeground : colors.foreground}
+                />
+                <Text
+                  style={[
+                    styles.actionText,
+                    { color: showText ? colors.primaryForeground : colors.foreground },
+                  ]}
+                >
+                  Text
+                </Text>
+              </Pressable>
               <Pressable
                 onPress={addMorePhotos}
                 style={[styles.actionBtn, { backgroundColor: colors.secondary }]}

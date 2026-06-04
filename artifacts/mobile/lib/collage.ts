@@ -27,6 +27,8 @@ export interface Collage {
   layers: Layer[];
   styleId: StyleId;
   formatId: FormatId;
+  /** whether the style's text captions/labels are shown. Off by default. */
+  showText?: boolean;
   thumbnailUri?: string;
   createdAt: number;
   updatedAt: number;

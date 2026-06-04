@@ -14,6 +14,7 @@ interface Props {
   width: number;
   height: number;
   editable: boolean;
+  showText: boolean;
   selectedId: string | null;
   innerRef?: React.Ref<View>;
   onSelect?: (id: string | null) => void;
@@ -90,6 +91,7 @@ export function CollageCanvas({
   width,
   height,
   editable,
+  showText,
   selectedId,
   innerRef,
   onSelect,
@@ -140,7 +142,7 @@ export function CollageCanvas({
         />
       ))}
 
-      <Decoration style={styleId} config={config} />
+      {showText ? <Decoration style={styleId} config={config} /> : null}
 
       {config.frame ? (
         <View
