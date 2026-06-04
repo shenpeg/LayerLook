@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: collage
+    description: Collage operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /collage/remove-background:
+    post:
+      operationId: removeBackground
+      tags: [collage]
+      summary: Remove background from an image
+      description: Isolates the subject of a photo and returns a transparent PNG cut-out
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CutoutRequest"
+      responses:
+        "200":
+          description: Cut-out image with transparent background
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CutoutResult"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +54,28 @@ components:
           type: string
       required:
         - status
+    CutoutRequest:
+      type: object
+      properties:
+        image:
+          type: string
+          description: Base64-encoded source image (no data URI prefix)
+        mimeType:
+          type: string
+          description: MIME type of the source image (e.g. image/jpeg)
+      required:
+        - image
+        - mimeType
+    CutoutResult:
+      type: object
+      properties:
+        image:
+          type: string
+          description: Base64-encoded PNG cut-out with transparent background
+        mimeType:
+          type: string
+          description: MIME type of the returned image
+      required:
+        - image
+        - mimeType
 

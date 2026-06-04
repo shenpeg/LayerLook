@@ -5,9 +5,6 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
 
 export interface CutoutRequest {
   /** Base64-encoded source image (no data URI prefix) */
@@ -15,11 +12,3 @@ export interface CutoutRequest {
   /** MIME type of the source image (e.g. image/jpeg) */
   mimeType: string;
 }
-
-export interface CutoutResult {
-  /** Base64-encoded PNG cut-out with transparent background */
-  image: string;
-  /** MIME type of the returned image */
-  mimeType: string;
-}
-
