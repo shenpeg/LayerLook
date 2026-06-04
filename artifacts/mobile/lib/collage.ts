@@ -6,6 +6,12 @@ import type { StyleId, FormatId } from "@/constants/styles";
 export interface Layer {
   id: string;
   uri: string;
+  /**
+   * Persisted copy of the original (pre-removal) photo. Used to re-run
+   * background removal on this single layer and to "restore" erased areas
+   * with the brush. Optional for collages created before this existed.
+   */
+  originalUri?: string;
   /** width / height of the cut-out image */
   aspectRatio: number;
   /** center offset as a fraction of the canvas width/height (0 = centered) */
@@ -56,6 +62,13 @@ export async function saveBase64(base64: string, name: string): Promise<string> 
     encoding: FileSystem.EncodingType.Base64,
   });
   return dest;
+}
+
+/** Read a file uri back into a base64 string (for re-sending to the API). */
+export function uriToBase64(uri: string): Promise<string> {
+  return FileSystem.readAsStringAsync(uri, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
 }
 
 /** Read the aspect ratio (w/h) of an image at a uri. Falls back to 1. */

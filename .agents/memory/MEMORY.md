@@ -1,3 +1,4 @@
 - [api-server external deps](api-server-external-deps.md) — the esbuild build externalizes whole scopes (e.g. `@google/*`); transitive deps from integration libs must be added as DIRECT api-server deps or runtime ERR_MODULE_NOT_FOUND.
 - [orval schema naming collisions](orval-naming-collisions.md) — orval derives zod const names from operationId+`Response`/`Body`; a component schema with the same name collides in the api-zod barrel — name schemas differently.
 - [mobile metro subpath imports](mobile-metro-subpath-imports.md) — don't import server integration libs' `/subpath` exports from the Expo app; Metro package-exports resolution is flaky on cold start — keep mobile bundle self-contained.
+- [cut-out erase/restore brush](cutout-brush-masking.md) — mobile has no Skia; pixel erase/restore uses react-native-svg dual-mask compositing + view-shot snapshot; layers persist `originalUri`.

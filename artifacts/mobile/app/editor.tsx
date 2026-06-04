@@ -29,6 +29,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { captureRef } from "react-native-view-shot";
 
 import { CollageCanvas } from "@/components/CollageCanvas";
+import { CutoutBrush } from "@/components/CutoutBrush";
 import { FormatBar } from "@/components/FormatBar";
 import { StyleBar } from "@/components/StyleBar";
 import { FORMATS, STYLES, type FormatId, type StyleId } from "@/constants/styles";
@@ -41,6 +42,7 @@ import {
   persistUri,
   saveBase64,
   scatterTransform,
+  uriToBase64,
   type Collage,
   type Layer,
 } from "@/lib/collage";
@@ -185,12 +187,18 @@ export default function EditorScreen() {
           mimeType: asset.mime,
         });
         const uri = await saveBase64(res.image, `cutout_${genId()}.png`);
+        // Keep the original photo so the user can re-cut or restore later.
+        const originalUri = await persistUri(
+          asset.uri,
+          `orig_${genId()}.${asset.mime === "image/png" ? "png" : "jpg"}`,
+        );
         const aspect = await getImageAspect(uri);
         const jitter = STYLES[styleId].jitter;
         const scatter = scatterTransform(index, 6, jitter);
         return {
           id: genId(),
           uri,
+          originalUri,
           aspectRatio: aspect,
           ...scatter,
           scale: 1,
@@ -261,6 +269,56 @@ export default function EditorScreen() {
   }, []);
 
   const selected = layers.find((l) => l.id === selectedId) ?? null;
+
+  const [brushLayerId, setBrushLayerId] = useState<string | null>(null);
+  const brushLayer = layers.find((l) => l.id === brushLayerId) ?? null;
+
+  // Re-run background removal on the selected cut-out alone.
+  const rerunRemoval = useCallback(async () => {
+    if (!selected) return;
+    const src = selected.originalUri ?? selected.uri;
+    setBusy(true);
+    try {
+      const base64 = await uriToBase64(src);
+      const res = await removeBackgroundApi({
+        image: base64,
+        mimeType: mimeFromUri(src, "image/png"),
+      });
+      const uri = await saveBase64(res.image, `cutout_${genId()}.png`);
+      const aspect = await getImageAspect(uri);
+      updateLayer(selected.id, { uri, aspectRatio: aspect });
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } catch {
+      Alert.alert(
+        "Couldn't redo",
+        "Background removal failed for this photo. Try again.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }, [selected, updateLayer]);
+
+  // Persist the brushed-up cut-out and swap it into the layer.
+  const handleBrushSave = useCallback(
+    async (tmpUri: string) => {
+      const id = brushLayerId;
+      setBrushLayerId(null);
+      if (!id) return;
+      setBusy(true);
+      try {
+        const uri = await persistUri(tmpUri, `cutout_${genId()}.png`);
+        const aspect = await getImageAspect(uri);
+        updateLayer(id, { uri, aspectRatio: aspect });
+      } catch {
+        Alert.alert("Couldn't save", "Editing the cut-out failed. Try again.");
+      } finally {
+        setBusy(false);
+      }
+    },
+    [brushLayerId, updateLayer],
+  );
 
   const deleteSelected = useCallback(() => {
     if (!selectedId) return;
@@ -497,10 +555,18 @@ export default function EditorScreen() {
 
           {selected ? (
             <View style={[styles.layerBar, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <LayerAction icon="copy" label="Copy" color={colors.foreground} onPress={duplicateSelected} />
-              <LayerAction icon="arrow-up" label="Forward" color={colors.foreground} onPress={bringForward} />
-              <LayerAction icon="arrow-down" label="Back" color={colors.foreground} onPress={sendBackward} />
-              <LayerAction icon="trash-2" label="Delete" color={colors.destructive} onPress={deleteSelected} />
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.layerBarContent}
+              >
+                <LayerAction icon="refresh-ccw" label="Re-cut" color={colors.foreground} onPress={rerunRemoval} />
+                <LayerAction icon="edit-2" label="Clean up" color={colors.foreground} onPress={() => setBrushLayerId(selected.id)} />
+                <LayerAction icon="copy" label="Copy" color={colors.foreground} onPress={duplicateSelected} />
+                <LayerAction icon="arrow-up" label="Forward" color={colors.foreground} onPress={bringForward} />
+                <LayerAction icon="arrow-down" label="Back" color={colors.foreground} onPress={sendBackward} />
+                <LayerAction icon="trash-2" label="Delete" color={colors.destructive} onPress={deleteSelected} />
+              </ScrollView>
             </View>
           ) : null}
 
@@ -560,6 +626,15 @@ export default function EditorScreen() {
         <View style={[styles.toast, { backgroundColor: colors.foreground, bottom: insets.bottom + 200 }]}>
           <Text style={styles.toastText}>{processError}</Text>
         </View>
+      ) : null}
+
+      {brushLayer ? (
+        <CutoutBrush
+          cutoutUri={brushLayer.uri}
+          originalUri={brushLayer.originalUri}
+          onCancel={() => setBrushLayerId(null)}
+          onSave={handleBrushSave}
+        />
       ) : null}
 
       {busy ? (
@@ -692,13 +767,19 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   layerBar: {
-    flexDirection: "row",
-    justifyContent: "space-around",
     marginHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 16,
     borderWidth: 1,
     marginBottom: 10,
+  },
+  layerBarContent: {
+    flexGrow: 1,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    gap: 8,
   },
   layerAction: { alignItems: "center", gap: 4, minWidth: 56 },
   layerActionText: { fontFamily: "Inter_500Medium", fontSize: 11 },
