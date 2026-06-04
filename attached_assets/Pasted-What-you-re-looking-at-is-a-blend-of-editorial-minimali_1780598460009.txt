@@ -1,0 +1,296 @@
+What you're looking at is a blend of **editorial minimalism**, **luxury scrapbook**, **gallery-card UI**, and **slow-living magazine aesthetics**. It feels curated rather than designed, like pages collected from a premium travel journal.
+
+Here's a prompt I'd give Replit/Claude to achieve this style consistently across an entire mobile app:
+
+---
+
+### Design System Prompt
+
+Design this mobile app in an elegant editorial scrapbook aesthetic that feels like a luxury print magazine translated into a modern digital experience.
+
+The visual language should feel:
+
+* Sophisticated and quiet
+* Curated rather than corporate
+* Emotional rather than functional
+* Inspired by high-end travel journals, Kinfolk magazine, Monocle, Cereal Magazine, luxury coffee table books, and contemporary scrapbook layouts
+* Airy, spacious, and intentionally slow
+
+Avoid anything that feels:
+
+* Startup SaaS
+* Material Design
+* Generic iOS templates
+* Bright gradients
+* Neumorphism
+* Glassmorphism
+* Gaming UI
+* Heavy shadows
+* Overly colorful interfaces
+
+---
+
+### Layout Principles
+
+Use generous whitespace throughout the interface.
+
+Every screen should feel like a magazine spread rather than a dashboard.
+
+Content should breathe with:
+
+* Large vertical spacing
+* Wide margins
+* Asymmetrical compositions
+* Editorial alignment
+* Intentional negative space
+
+Cards should not fill the screen edge-to-edge.
+
+Elements should feel placed and curated rather than perfectly grid-aligned.
+
+Favor:
+
+* 8–24px subtle offsets
+* Slight overlaps
+* Layered compositions
+* Organic positioning
+
+The overall feeling should be "beautifully arranged scrapbook" rather than "structured product UI."
+
+---
+
+### Card Design
+
+Primary content should live inside rounded editorial cards.
+
+Card styling:
+
+```css
+border-radius: 32px;
+background: #F9F8F5;
+overflow: hidden;
+```
+
+Cards should feel like printed paper pieces mounted onto a scrapbook page.
+
+Inside cards:
+
+* Large image area
+* Editorial typography block
+* Tiny supporting metadata
+* Delicate dividers
+* Soft visual hierarchy
+
+Cards should resemble:
+
+* Magazine clippings
+* Polaroid layouts
+* Travel diary pages
+* Museum exhibition cards
+
+---
+
+### Color Palette
+
+Use muted, natural tones only.
+
+Base colors:
+
+* Warm ivory
+* Soft cream
+* Bone white
+* Light oatmeal
+* Dusty beige
+* Pale stone
+
+Accent colors:
+
+* Sage green
+* Moss green
+* Faded olive
+* Muted navy
+* Soft charcoal
+
+Avoid:
+
+* Pure black
+* Pure white
+* Neon colors
+* Saturated blues
+* Bright reds
+
+Example palette:
+
+```css
+--background: #F5F2EE;
+--surface: #FCFBF8;
+--text-primary: #2E2E2B;
+--text-secondary: #74706A;
+--border: #E7E3DD;
+--accent: #77806A;
+```
+
+The interface should feel like aged paper and premium print stock.
+
+---
+
+### Typography
+
+Typography is the hero.
+
+Use an editorial serif paired with a clean modern sans-serif.
+
+Headlines:
+
+* Canela
+* Cormorant Garamond
+* EB Garamond
+* Editorial New
+
+Body:
+
+* Inter
+* Suisse
+* Neue Haas Grotesk
+* SF Pro
+
+Hierarchy:
+
+Large headline
+
+```css
+font-size: 28-36px;
+font-weight: 500;
+line-height: 1.1;
+```
+
+Supporting title
+
+```css
+font-size: 18-22px;
+```
+
+Body copy
+
+```css
+font-size: 14-16px;
+line-height: 1.6;
+```
+
+Micro labels
+
+```css
+font-size: 10-12px;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+```
+
+Typography should feel like a magazine article, not an app interface.
+
+---
+
+### Imagery
+
+Images should feel:
+
+* Documentary
+* Natural light
+* Film photography
+* Travel photography
+* Lifestyle editorial
+* Quiet moments
+* Nature-focused
+
+Avoid:
+
+* Stock photography
+* Corporate people smiling
+* Bright studio lighting
+* Heavy filters
+
+Images should often be:
+
+* Cropped imperfectly
+* Layered inside cards
+* Framed like scrapbook cutouts
+
+Photography should feel discovered, not produced.
+
+---
+
+### Scrapbook Details
+
+Introduce subtle scrapbook-inspired touches:
+
+* Tiny handwritten annotations
+* Small date stamps
+* Light paper texture
+* Minimal divider lines
+* Tiny captions
+* Editorial side notes
+* Polaroid-style image framing
+* Occasional torn-paper edge masks
+
+Use these sparingly.
+
+The effect should feel refined and luxury, not arts-and-crafts.
+
+Think "premium design annual" rather than Pinterest scrapbook.
+
+---
+
+### Interactions
+
+Animations should feel calm and physical.
+
+Use:
+
+* Slow easing
+* Gentle parallax
+* Floating image movement
+* Subtle card lift
+* Smooth page transitions
+
+Animation timing:
+
+```css
+duration: 400-800ms;
+easing: cubic-bezier(0.22, 1, 0.36, 1);
+```
+
+Nothing should snap aggressively.
+
+The app should feel like turning pages in a beautifully printed journal.
+
+---
+
+### Navigation
+
+Navigation should be understated.
+
+Use:
+
+* Thin dividers
+* Minimal iconography
+* Editorial labels
+* Floating navigation bars
+
+Avoid:
+
+* Heavy tab bars
+* Large CTA buttons
+* Bright primary colors
+
+Buttons should feel like editorial controls rather than app controls.
+
+---
+
+### Overall Experience
+
+The app should feel like:
+
+> A luxury travel journal, art magazine, and curated scrapbook combined into a modern mobile experience.
+
+Every screen should evoke the feeling of slowly browsing a beautifully designed coffee table book, where content is thoughtfully arranged, highly visual, emotionally resonant, and elevated through editorial typography and generous whitespace.
+
+Prioritize elegance, restraint, curation, and timelessness over efficiency, density, or conventional mobile UI patterns.
