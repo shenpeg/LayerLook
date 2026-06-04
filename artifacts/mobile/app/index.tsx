@@ -43,19 +43,31 @@ export default function GalleryScreen() {
   );
 
   const renderItem = useCallback(
-    ({ item }: { item: Collage }) => {
+    ({ item, index }: { item: Collage; index: number }) => {
       const thumb = item.thumbnailUri ?? item.backgroundUri;
+      // Gentle asymmetry: nudge alternating columns to feel hand-placed.
+      const offset = index % 2 === 0 ? 0 : 18;
       return (
         <Pressable
-          style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
+          style={[
+            styles.card,
+            {
+              backgroundColor: colors.card,
+              borderColor: colors.border,
+              marginTop: offset,
+            },
+          ]}
           onPress={() => router.push({ pathname: "/editor", params: { id: item.id } })}
           onLongPress={() => confirmDelete(item)}
         >
-          <Image source={{ uri: thumb }} style={styles.cardImage} contentFit="cover" />
-          <View style={styles.cardBadgeWrap}>
-            <Text style={[styles.cardBadge, { backgroundColor: colors.primary, color: colors.primaryForeground }]}>
-              {STYLES[item.styleId].name}
+          <View style={styles.cardImageWrap}>
+            <Image source={{ uri: thumb }} style={styles.cardImage} contentFit="cover" />
+          </View>
+          <View style={styles.cardMeta}>
+            <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
+              {STYLES[item.styleId].name.toUpperCase()}
             </Text>
+            <View style={[styles.cardDot, { backgroundColor: colors.accent }]} />
           </View>
         </Pressable>
       );
@@ -66,25 +78,32 @@ export default function GalleryScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar style="dark" />
-      <View style={{ paddingTop: insets.top + WEB_TOP + 14 }}>
+      <View style={{ paddingTop: insets.top + WEB_TOP + 22 }}>
         <View style={styles.header}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.kicker, { color: colors.primary }]}>OUTFIT COLLAGE</Text>
-            <Text style={[styles.title, { color: colors.foreground }]}>Your Studio</Text>
-          </View>
+          <Text style={[styles.kicker, { color: colors.primary }]}>
+            OUTFIT COLLAGE · NO.01
+          </Text>
+          <Text style={[styles.title, { color: colors.foreground }]}>
+            The Studio
+          </Text>
+          <Text style={[styles.lede, { color: colors.mutedForeground }]}>
+            A quiet archive of your layered looks, arranged like pages from a
+            travel journal.
+          </Text>
         </View>
+        <View style={[styles.rule, { backgroundColor: colors.border }]} />
       </View>
 
       {!loaded ? null : collages.length === 0 ? (
         <View style={styles.empty}>
-          <View style={[styles.emptyIcon, { backgroundColor: colors.secondary }]}>
-            <Feather name="scissors" size={30} color={colors.primary} />
+          <View style={[styles.emptyIcon, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
+            <Feather name="scissors" size={28} color={colors.primary} />
           </View>
           <Text style={[styles.emptyTitle, { color: colors.foreground }]}>
-            No collages yet
+            Nothing collected yet
           </Text>
           <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
-            Pick a few outfit photos and turn them into a layered fashion
+            Gather a few outfit photos and arrange them into a layered fashion
             collage.
           </Text>
         </View>
@@ -96,8 +115,9 @@ export default function GalleryScreen() {
           numColumns={2}
           columnWrapperStyle={styles.column}
           contentContainerStyle={{
-            padding: 16,
-            paddingBottom: insets.bottom + WEB_BOTTOM + 110,
+            paddingHorizontal: 20,
+            paddingTop: 22,
+            paddingBottom: insets.bottom + WEB_BOTTOM + 120,
           }}
           showsVerticalScrollIndicator={false}
         />
@@ -109,13 +129,13 @@ export default function GalleryScreen() {
           styles.fab,
           {
             backgroundColor: colors.primary,
-            bottom: insets.bottom + WEB_BOTTOM + 24,
-            opacity: pressed ? 0.9 : 1,
-            transform: [{ scale: pressed ? 0.97 : 1 }],
+            bottom: insets.bottom + WEB_BOTTOM + 26,
+            opacity: pressed ? 0.92 : 1,
+            transform: [{ scale: pressed ? 0.98 : 1 }],
           },
         ]}
       >
-        <Feather name="plus" size={22} color={colors.primaryForeground} />
+        <Feather name="plus" size={20} color={colors.primaryForeground} />
         <Text style={[styles.fabText, { color: colors.primaryForeground }]}>
           New Collage
         </Text>
@@ -127,68 +147,87 @@ export default function GalleryScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingBottom: 8,
+    paddingHorizontal: 24,
+    paddingBottom: 18,
   },
   kicker: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 12,
-    letterSpacing: 3,
+    fontSize: 11,
+    letterSpacing: 2.6,
   },
   title: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 30,
-    marginTop: 2,
+    fontFamily: "CormorantGaramond_600SemiBold",
+    fontSize: 44,
+    lineHeight: 48,
+    marginTop: 6,
   },
-  column: { gap: 14 },
+  lede: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+    lineHeight: 22,
+    marginTop: 10,
+    maxWidth: 300,
+  },
+  rule: {
+    height: 1,
+    marginHorizontal: 24,
+  },
+  column: { gap: 18 },
   card: {
     flex: 1,
-    aspectRatio: 0.74,
-    borderRadius: 18,
+    borderRadius: 28,
     borderWidth: 1,
+    padding: 8,
+    marginBottom: 22,
+  },
+  cardImageWrap: {
+    aspectRatio: 0.78,
+    borderRadius: 22,
     overflow: "hidden",
-    marginBottom: 14,
   },
   cardImage: { flex: 1 },
-  cardBadgeWrap: {
-    position: "absolute",
-    top: 10,
-    left: 10,
+  cardMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 8,
+    paddingTop: 12,
+    paddingBottom: 6,
   },
-  cardBadge: {
+  cardLabel: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-    letterSpacing: 0.5,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 999,
-    overflow: "hidden",
+    fontSize: 10,
+    letterSpacing: 1.6,
+  },
+  cardDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   empty: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 40,
+    paddingHorizontal: 44,
   },
   emptyIcon: {
-    width: 74,
-    height: 74,
-    borderRadius: 37,
+    width: 78,
+    height: 78,
+    borderRadius: 39,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 18,
+    marginBottom: 22,
+    borderWidth: 1,
   },
   emptyTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 20,
+    fontFamily: "CormorantGaramond_600SemiBold",
+    fontSize: 28,
     marginBottom: 8,
   },
   emptyText: {
     fontFamily: "Inter_400Regular",
     fontSize: 15,
-    lineHeight: 22,
+    lineHeight: 23,
     textAlign: "center",
   },
   fab: {
@@ -196,18 +235,19 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 22,
+    gap: 9,
+    paddingHorizontal: 24,
     paddingVertical: 15,
     borderRadius: 999,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
+    shadowColor: "#2E2E2B",
+    shadowOpacity: 0.16,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
     elevation: 6,
   },
   fabText: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 16,
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 15,
+    letterSpacing: 0.3,
   },
 });

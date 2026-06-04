@@ -41,10 +41,10 @@ export function StyleBar({ value, onChange }: Props) {
             <Text
               style={[
                 styles.label,
-                { color: active ? colors.primaryForeground : colors.foreground },
+                { color: active ? colors.primaryForeground : colors.mutedForeground },
               ]}
             >
-              {STYLES[id].name}
+              {STYLES[id].name.toUpperCase()}
             </Text>
           </Pressable>
         );
@@ -67,6 +67,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
+    fontSize: 11,
+    letterSpacing: 1.4,
   },
 });

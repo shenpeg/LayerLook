@@ -683,17 +683,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   headerTitle: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 17,
+    fontFamily: "CormorantGaramond_600SemiBold",
+    fontSize: 24,
   },
   doneBtn: {
     height: 42,
-    paddingHorizontal: 20,
+    paddingHorizontal: 22,
     borderRadius: 21,
     alignItems: "center",
     justifyContent: "center",
   },
-  doneText: { fontFamily: "Inter_700Bold", fontSize: 15 },
+  doneText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 14,
+    letterSpacing: 0.3,
+  },
 
   center: {
     flex: 1,
@@ -710,27 +714,31 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
   bigTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 23,
+    fontFamily: "CormorantGaramond_600SemiBold",
+    fontSize: 30,
     textAlign: "center",
     marginBottom: 8,
   },
   sub: {
     fontFamily: "Inter_400Regular",
     fontSize: 15,
-    lineHeight: 22,
+    lineHeight: 23,
     textAlign: "center",
   },
   primaryBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 9,
-    paddingHorizontal: 26,
+    paddingHorizontal: 28,
     paddingVertical: 15,
     borderRadius: 999,
     marginTop: 28,
   },
-  primaryBtnText: { fontFamily: "Inter_700Bold", fontSize: 16 },
+  primaryBtnText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 15,
+    letterSpacing: 0.3,
+  },
 
   chooseWrap: { flex: 1, paddingHorizontal: 20, paddingTop: 6 },
   grid: {
@@ -742,7 +750,7 @@ const styles = StyleSheet.create({
   gridItem: {
     width: "47%",
     aspectRatio: 0.8,
-    borderRadius: 14,
+    borderRadius: 22,
     overflow: "hidden",
     borderWidth: 1,
   },
@@ -769,7 +777,7 @@ const styles = StyleSheet.create({
   layerBar: {
     marginHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 16,
+    borderRadius: 22,
     borderWidth: 1,
     marginBottom: 10,
   },
@@ -798,10 +806,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: 18,
   },
   saveBtn: { flex: 1.3 },
-  actionText: { fontFamily: "Inter_700Bold", fontSize: 15 },
+  actionText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 14,
+    letterSpacing: 0.2,
+  },
 
   toast: {
     position: "absolute",

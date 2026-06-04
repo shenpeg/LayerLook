@@ -1,41 +1,42 @@
 /**
  * Semantic design tokens for the Outfit Collage Maker.
  *
- * Warm, editorial + scrapbook palette: cream paper surfaces, charcoal ink,
- * and a single terracotta/coral accent.
+ * Editorial scrapbook / slow-living magazine palette: warm ivory paper
+ * surfaces, soft charcoal ink, and a muted sage-green accent. Aged-paper
+ * tones throughout — no pure black, pure white, or saturated colour.
  */
 
 const colors = {
   light: {
-    text: "#211C17",
-    tint: "#C9512E",
+    text: "#2E2E2B",
+    tint: "#6F7860",
 
-    background: "#F6F0E8",
-    foreground: "#211C17",
+    background: "#F4F1EB",
+    foreground: "#2E2E2B",
 
-    card: "#FFFFFF",
-    cardForeground: "#211C17",
+    card: "#FCFBF8",
+    cardForeground: "#2E2E2B",
 
-    primary: "#C9512E",
-    primaryForeground: "#FFF8F1",
+    primary: "#6F7860",
+    primaryForeground: "#F7F6F1",
 
-    secondary: "#EDE3D5",
-    secondaryForeground: "#3A332C",
+    secondary: "#ECE7DF",
+    secondaryForeground: "#3A3733",
 
-    muted: "#EAE0D2",
-    mutedForeground: "#8C8071",
+    muted: "#E7E3DD",
+    mutedForeground: "#74706A",
 
-    accent: "#E8C9A0",
-    accentForeground: "#3A332C",
+    accent: "#8A9276",
+    accentForeground: "#2E2E2B",
 
-    destructive: "#C0392B",
-    destructiveForeground: "#FFF8F1",
+    destructive: "#9A5B4F",
+    destructiveForeground: "#F7F6F1",
 
-    border: "#E2D6C4",
-    input: "#E2D6C4",
+    border: "#E2DCD2",
+    input: "#E2DCD2",
   },
 
-  radius: 16,
+  radius: 28,
 };
 
 export default colors;

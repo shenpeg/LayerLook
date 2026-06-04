@@ -68,12 +68,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 7,
-    paddingVertical: 10,
-    borderRadius: 12,
+    paddingVertical: 11,
+    borderRadius: 16,
     borderWidth: 1,
   },
   caption: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
+    fontSize: 12,
+    letterSpacing: 0.6,
   },
 });

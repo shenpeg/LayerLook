@@ -186,7 +186,7 @@ export function CutoutBrush({
   const headerPad = insets.top + WEB_TOP + 8;
 
   return (
-    <View style={[styles.root, { backgroundColor: "#0E0D0C" }]}>
+    <View style={[styles.root, { backgroundColor: "#272420" }]}>
       <View style={[styles.header, { paddingTop: headerPad }]}>
         <Pressable onPress={onCancel} style={styles.headerBtn} hitSlop={8}>
           <Text style={styles.cancelText}>Cancel</Text>
