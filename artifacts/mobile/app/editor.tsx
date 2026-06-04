@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { removeBackground as removeBackgroundApi } from "@workspace/api-client-react";
+import { batchProcess } from "@workspace/integrations-gemini-ai/batch";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
@@ -214,14 +215,18 @@ export default function EditorScreen() {
       setBackgroundUri(bgUri);
       setBackgroundAspect(bg.aspect);
 
-      const newLayers: Layer[] = [];
-      let failures = 0;
-      for (let i = 0; i < others.length; i++) {
-        const layer = await cutoutFromAsset(others[i], i);
-        if (layer) newLayers.push(layer);
-        else failures += 1;
-        setProgress({ done: i + 1, total: others.length });
-      }
+      const results = await batchProcess(
+        others,
+        (asset, index) => cutoutFromAsset(asset, index),
+        {
+          concurrency: 3,
+          onProgress: (completed) =>
+            setProgress({ done: completed, total: others.length }),
+        },
+      );
+
+      const newLayers = results.filter((l): l is Layer => l !== null);
+      const failures = results.length - newLayers.length;
 
       setLayers(newLayers);
       if (failures > 0) {
