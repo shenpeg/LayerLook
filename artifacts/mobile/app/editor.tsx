@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { removeBackground as removeBackgroundApi } from "@workspace/api-client-react";
-import { batchProcess } from "@workspace/integrations-gemini-ai/batch";
+import { batchProcess } from "@/lib/batch";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
