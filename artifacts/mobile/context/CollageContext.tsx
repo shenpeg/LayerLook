@@ -7,10 +7,58 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { Asset } from "expo-asset";
 
+import type { StyleId, FormatId } from "@/constants/styles";
 import type { Collage } from "@/lib/collage";
 
 const STORAGE_KEY = "outfit-collages-v1";
+const SEEDED_KEY = "outfit-collages-seeded-v1";
+
+/**
+ * Two ready-made stories shown the first time the app is opened (before the
+ * user has saved anything of their own), so the gallery never starts empty.
+ * They use the bundled mood-board images as their backgrounds.
+ */
+const SAMPLE_SOURCES: {
+  mod: number;
+  styleId: StyleId;
+  formatId: FormatId;
+}[] = [
+  {
+    mod: require("@/assets/images/styles/fashion-story.png") as number,
+    styleId: "street",
+    formatId: "story",
+  },
+  {
+    mod: require("@/assets/images/styles/visual-diary.png") as number,
+    styleId: "pinterest",
+    formatId: "portrait",
+  },
+];
+
+function buildSampleCollages(): Collage[] {
+  const now = Date.now();
+  return SAMPLE_SOURCES.map((sample, i) => {
+    const resolved = Asset.fromModule(sample.mod);
+    const uri = resolved?.uri ?? "";
+    const ratio =
+      resolved?.width && resolved?.height
+        ? resolved.width / resolved.height
+        : 0.71;
+    return {
+      id: `sample-${i + 1}`,
+      backgroundUri: uri,
+      backgroundAspectRatio: ratio,
+      layers: [],
+      styleId: sample.styleId,
+      formatId: sample.formatId,
+      thumbnailUri: uri,
+      createdAt: now - i * 86_400_000,
+      updatedAt: now - i * 86_400_000,
+    };
+  });
+}
 
 interface CollageContextValue {
   collages: Collage[];
@@ -30,11 +78,33 @@ export function CollageProvider({ children }: { children: React.ReactNode }) {
     let active = true;
     (async () => {
       try {
-        const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (active && raw) {
+        const [raw, seeded] = await Promise.all([
+          AsyncStorage.getItem(STORAGE_KEY),
+          AsyncStorage.getItem(SEEDED_KEY),
+        ]);
+
+        let initial: Collage[] = [];
+        if (raw) {
           const parsed = JSON.parse(raw) as Collage[];
-          if (Array.isArray(parsed)) setCollages(parsed);
+          if (Array.isArray(parsed)) initial = parsed;
         }
+
+        // Seed the sample stories exactly once (first launch). Using a marker
+        // — rather than "is the list empty?" — means deleting the samples
+        // later won't bring them back.
+        if (!seeded) {
+          const samples = buildSampleCollages();
+          initial = [
+            ...samples,
+            ...initial.filter((c) => !c.id.startsWith("sample-")),
+          ];
+          AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(initial)).catch(
+            () => {},
+          );
+          AsyncStorage.setItem(SEEDED_KEY, "1").catch(() => {});
+        }
+
+        if (active) setCollages(initial);
       } catch {
         // ignore corrupt storage
       } finally {

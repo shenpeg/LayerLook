@@ -85,73 +85,90 @@ export default function GalleryScreen() {
     [colors, router, confirmDelete],
   );
 
+  const listHeader = (
+    <View style={{ paddingTop: insets.top + WEB_TOP + 22 }}>
+      <View style={styles.header}>
+        <Text style={[styles.kicker, { color: colors.primary }]}>
+          LAYERLOOK · OUTFIT COLLAGE
+        </Text>
+        <Text style={[styles.title, { color: colors.foreground }]}>
+          The Studio
+        </Text>
+        <Text style={[styles.lede, { color: colors.mutedForeground }]}>
+          An archive of your layered looks, turned into pages of a fashion
+          story.
+        </Text>
+      </View>
+      <View style={[styles.rule, { backgroundColor: colors.border }]} />
+
+      <View style={styles.directionsHead}>
+        <Text style={[styles.sectionKicker, { color: colors.primary }]}>
+          CREATIVE DIRECTIONS
+        </Text>
+        <Text style={[styles.sectionNote, { color: colors.mutedForeground }]}>
+          Five ways to style your story.
+        </Text>
+      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.directionsRow}
+      >
+        {CREATIVE_DIRECTIONS.map((id) => (
+          <DirectionPreview key={id} styleId={id} />
+        ))}
+      </ScrollView>
+
+      {loaded && collages.length > 0 ? (
+        <View style={styles.historyHead}>
+          <Text style={[styles.sectionKicker, { color: colors.primary }]}>
+            YOUR STORIES
+          </Text>
+          <Text style={[styles.sectionNote, { color: colors.mutedForeground }]}>
+            Looks you have layered and saved.
+          </Text>
+        </View>
+      ) : null}
+    </View>
+  );
+
+  const emptyState = (
+    <View style={styles.empty}>
+      <View
+        style={[
+          styles.emptyIcon,
+          { backgroundColor: colors.secondary, borderColor: colors.border },
+        ]}
+      >
+        <Feather name="scissors" size={28} color={colors.primary} />
+      </View>
+      <Text style={[styles.emptyTitle, { color: colors.foreground }]}>
+        Nothing collected yet
+      </Text>
+      <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
+        Gather a few outfit photos and arrange them into a layered fashion
+        collage.
+      </Text>
+    </View>
+  );
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar style="dark" />
-      <View style={{ paddingTop: insets.top + WEB_TOP + 22 }}>
-        <View style={styles.header}>
-          <Text style={[styles.kicker, { color: colors.primary }]}>
-            LAYERLOOK · OUTFIT COLLAGE
-          </Text>
-          <Text style={[styles.title, { color: colors.foreground }]}>
-            The Studio
-          </Text>
-          <Text style={[styles.lede, { color: colors.mutedForeground }]}>
-            An archive of your layered looks, turned into pages of a fashion
-            story.
-          </Text>
-        </View>
-        <View style={[styles.rule, { backgroundColor: colors.border }]} />
-
-        <View style={styles.directionsHead}>
-          <Text style={[styles.sectionKicker, { color: colors.primary }]}>
-            CREATIVE DIRECTIONS
-          </Text>
-          <Text
-            style={[styles.sectionNote, { color: colors.mutedForeground }]}
-          >
-            Five ways to style your story.
-          </Text>
-        </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.directionsRow}
-        >
-          {CREATIVE_DIRECTIONS.map((id) => (
-            <DirectionPreview key={id} styleId={id} />
-          ))}
-        </ScrollView>
-      </View>
-
-      {!loaded ? null : collages.length === 0 ? (
-        <View style={styles.empty}>
-          <View style={[styles.emptyIcon, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
-            <Feather name="scissors" size={28} color={colors.primary} />
-          </View>
-          <Text style={[styles.emptyTitle, { color: colors.foreground }]}>
-            Nothing collected yet
-          </Text>
-          <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
-            Gather a few outfit photos and arrange them into a layered fashion
-            collage.
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={collages}
-          keyExtractor={(c) => c.id}
-          renderItem={renderItem}
-          numColumns={2}
-          columnWrapperStyle={styles.column}
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingTop: 22,
-            paddingBottom: insets.bottom + WEB_BOTTOM + 120,
-          }}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+      <FlatList
+        data={loaded ? collages : []}
+        keyExtractor={(c) => c.id}
+        renderItem={renderItem}
+        numColumns={2}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={loaded ? emptyState : null}
+        columnWrapperStyle={styles.column}
+        contentContainerStyle={{
+          paddingBottom: insets.bottom + WEB_BOTTOM + 120,
+        }}
+        showsVerticalScrollIndicator={false}
+        style={styles.list}
+      />
 
       <Pressable
         onPress={() => router.push("/editor")}
@@ -222,7 +239,13 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingBottom: 6,
   },
-  column: { gap: 18 },
+  historyHead: {
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 6,
+  },
+  list: { flex: 1 },
+  column: { gap: 18, paddingHorizontal: 20 },
   card: {
     flex: 1,
     borderRadius: 28,
