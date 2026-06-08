@@ -13,6 +13,8 @@ export type FormatId = "story" | "portrait" | "square";
 export interface StyleConfig {
   id: StyleId;
   name: string;
+  /** Short one-line descriptor shown under the style on the home screen. */
+  tagline: string;
   /** Optional full-bleed gradient overlay drawn over the background photo. */
   overlay: { colors: [string, string]; locations?: [number, number] } | null;
   /** Inner frame (margin) drawn on top of the canvas edges. */
@@ -37,6 +39,7 @@ export const STYLES: Record<StyleId, StyleConfig> = {
   editorial: {
     id: "editorial",
     name: "Editorial",
+    tagline: "Clean margins, quiet ink.",
     overlay: { colors: ["rgba(255,255,255,0.10)", "rgba(20,18,16,0.18)"] },
     frame: { width: 14, color: "#F8F3EC" },
     shadow: { color: "#000000", radius: 14, opacity: 0.22, offsetY: 8 },
@@ -47,6 +50,7 @@ export const STYLES: Record<StyleId, StyleConfig> = {
   scrapbook: {
     id: "scrapbook",
     name: "Scrapbook",
+    tagline: "Tilted, taped, hand-made.",
     overlay: { colors: ["rgba(247,236,214,0.18)", "rgba(120,90,50,0.22)"] },
     frame: { width: 10, color: "#FBF4E6" },
     shadow: { color: "#3a2a14", radius: 10, opacity: 0.3, offsetY: 6 },
@@ -56,7 +60,8 @@ export const STYLES: Record<StyleId, StyleConfig> = {
   },
   magazine: {
     id: "magazine",
-    name: "Magazine",
+    name: "Modernist",
+    tagline: "Bold, graphic, gallery-white.",
     overlay: { colors: ["rgba(0,0,0,0.05)", "rgba(0,0,0,0.4)"] },
     frame: null,
     shadow: { color: "#000000", radius: 16, opacity: 0.4, offsetY: 10 },
@@ -66,7 +71,8 @@ export const STYLES: Record<StyleId, StyleConfig> = {
   },
   pinterest: {
     id: "pinterest",
-    name: "Pinterest",
+    name: "Visual Diary",
+    tagline: "Soft, pinned, personal.",
     overlay: { colors: ["rgba(255,248,244,0.22)", "rgba(210,180,170,0.18)"] },
     frame: null,
     shadow: { color: "#7a6a60", radius: 18, opacity: 0.22, offsetY: 8 },
@@ -76,7 +82,8 @@ export const STYLES: Record<StyleId, StyleConfig> = {
   },
   street: {
     id: "street",
-    name: "Street",
+    name: "Fashion Story",
+    tagline: "High-contrast street edit.",
     overlay: { colors: ["rgba(0,0,0,0.18)", "rgba(0,0,0,0.5)"] },
     frame: { width: 4, color: "#111111" },
     shadow: { color: "#000000", radius: 12, opacity: 0.45, offsetY: 8 },

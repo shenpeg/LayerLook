@@ -8,16 +8,26 @@ import {
   FlatList,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { DirectionPreview } from "@/components/DirectionPreview";
 import { useCollages } from "@/context/CollageContext";
-import { STYLES } from "@/constants/styles";
+import { STYLES, type StyleId } from "@/constants/styles";
 import { useColors } from "@/hooks/useColors";
 import type { Collage } from "@/lib/collage";
+
+const CREATIVE_DIRECTIONS: StyleId[] = [
+  "editorial",
+  "magazine",
+  "pinterest",
+  "scrapbook",
+  "street",
+];
 
 const WEB_TOP = Platform.OS === "web" ? 67 : 0;
 const WEB_BOTTOM = Platform.OS === "web" ? 34 : 0;
@@ -92,6 +102,26 @@ export default function GalleryScreen() {
           </Text>
         </View>
         <View style={[styles.rule, { backgroundColor: colors.border }]} />
+
+        <View style={styles.directionsHead}>
+          <Text style={[styles.sectionKicker, { color: colors.primary }]}>
+            CREATIVE DIRECTIONS
+          </Text>
+          <Text
+            style={[styles.sectionNote, { color: colors.mutedForeground }]}
+          >
+            Five ways to style your story.
+          </Text>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.directionsRow}
+        >
+          {CREATIVE_DIRECTIONS.map((id) => (
+            <DirectionPreview key={id} styleId={id} />
+          ))}
+        </ScrollView>
       </View>
 
       {!loaded ? null : collages.length === 0 ? (
@@ -171,6 +201,26 @@ const styles = StyleSheet.create({
   rule: {
     height: 1,
     marginHorizontal: 24,
+  },
+  directionsHead: {
+    paddingHorizontal: 24,
+    paddingTop: 22,
+    paddingBottom: 14,
+  },
+  sectionKicker: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 11,
+    letterSpacing: 2.6,
+  },
+  sectionNote: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
+    marginTop: 5,
+  },
+  directionsRow: {
+    paddingHorizontal: 24,
+    gap: 16,
+    paddingBottom: 6,
   },
   column: { gap: 18 },
   card: {
