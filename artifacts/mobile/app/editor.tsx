@@ -18,6 +18,7 @@ import React, {
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Platform,
   Pressable,
   ScrollView,
@@ -73,6 +74,28 @@ export default function EditorScreen() {
   const [picked, setPicked] = useState<PickedAsset[]>([]);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [processError, setProcessError] = useState<string | null>(null);
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!processError) return;
+    toastOpacity.setValue(0);
+    const useNativeDriver = Platform.OS !== "web";
+    Animated.timing(toastOpacity, {
+      toValue: 1,
+      duration: 250,
+      useNativeDriver,
+    }).start();
+    const timer = setTimeout(() => {
+      Animated.timing(toastOpacity, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver,
+      }).start(({ finished }) => {
+        if (finished) setProcessError(null);
+      });
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [processError, toastOpacity]);
 
   const [backgroundUri, setBackgroundUri] = useState("");
   const [backgroundAspect, setBackgroundAspect] = useState(1);
@@ -713,9 +736,17 @@ export default function EditorScreen() {
       ) : null}
 
       {processError ? (
-        <View style={[styles.toast, { backgroundColor: colors.foreground, bottom: insets.bottom + 200 }]}>
-          <Text style={styles.toastText}>{processError}</Text>
-        </View>
+        <Animated.View
+          style={[
+            styles.toast,
+            { backgroundColor: colors.foreground, bottom: insets.bottom + 200, opacity: toastOpacity },
+          ]}
+        >
+          <Pressable onPress={() => setProcessError(null)} style={styles.toastInner}>
+            <Text style={styles.toastText}>{processError}</Text>
+            <Text style={styles.toastDismiss}>Tap to dismiss</Text>
+          </Pressable>
+        </Animated.View>
       ) : null}
 
       {brushLayer ? (
@@ -950,11 +981,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 12,
   },
+  toastInner: {
+    alignItems: "center",
+  },
   toastText: {
     color: "#fff",
     fontFamily: "Inter_500Medium",
     fontSize: 13,
     textAlign: "center",
+  },
+  toastDismiss: {
+    color: "rgba(255,255,255,0.6)",
+    fontFamily: "Inter_500Medium",
+    fontSize: 11,
+    textAlign: "center",
+    marginTop: 4,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
