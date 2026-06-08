@@ -101,7 +101,7 @@ export default function GalleryScreen() {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={[styles.kicker, { color: colors.primary }]}>
-            LAYERLOOK · OUTFIT COLLAGE
+            LAYERLOOK
           </Text>
           <Pressable
             onPress={() => setAboutOpen(true)}
