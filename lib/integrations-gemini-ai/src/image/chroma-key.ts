@@ -27,6 +27,13 @@ const SEED_SAT = 0.5;
 const GROW_SAT = 0.25;
 // Minimum brightness so deep shadows aren't keyed.
 const MIN_VAL = 45;
+// Euclidean tolerance (0–441 RGB space) for matching a pixel to the *measured*
+// background fill colour. Used only to clear background trapped inside the
+// subject (e.g. the gap enclosed by a bag's handle loop). Because the model
+// paints one uniform fill, trapped pockets match the border background very
+// tightly, so this stays narrow enough to spare a differently-shaded magenta
+// garment from being punched through.
+const TRAP_TOL = 55;
 
 // How many pixels the feathered edge may grow inward from the keyed region.
 // Bounding this means a pink/purple garment that happens to touch the magenta
@@ -93,18 +100,20 @@ function magentaness(r: number, g: number, b: number): number {
  * with a genuinely transparent background.
  *
  * Strategy (designed to avoid cutting holes in magenta/pink garments):
- *  1. Flood-fill keyed by saturation. The fill is *seeded* from every vivid
- *     magenta pixel anywhere in the image — vivid saturation is the chroma
- *     background's signature — which catches both the outer background and
- *     background trapped inside the subject (a bag's handle loop, the gap
- *     between an arm and the torso) that an edge-only flood can't reach. It
- *     then *grows* through any connected magenta-hue pixel down to a looser
- *     saturation, sweeping up off/desaturated background and the transition
- *     band around the subject. A muted pink/purple garment (saturation below
- *     the seed threshold) is left untouched unless it is directly connected to
- *     a vivid seed; a garment that is itself vividly magenta is inherently
- *     ambiguous against a magenta key and may be removed.
- *  2. Feather a few pixels inward from the keyed region, giving rim pixels a
+ *  1. Outer background: edge-connected flood-fill. Seed only from vivid magenta
+ *     on the image border, then grow through connected magenta-hue pixels down
+ *     to a looser saturation, sweeping up off/desaturated background and the
+ *     transition band around the subject. Because removal is edge-connected, an
+ *     interior pink/purple garment not reachable from a border stays fully
+ *     opaque — no hole is punched in clothing.
+ *  2. Trapped background: clear pockets enclosed by the subject (e.g. the gap
+ *     inside a bag's handle loop) that step 1 can't reach. We measure the actual
+ *     fill colour from the step-1 background and key only enclosed pixels that
+ *     match it tightly. The model paints one uniform fill, so real trapped
+ *     background matches closely; a differently-shaded magenta garment does not
+ *     and is spared. (Only a garment that is the exact background fill colour —
+ *     extremely unlikely — is at risk.)
+ *  3. Feather a few pixels inward from the keyed region, giving rim pixels a
  *     partial alpha proportional to how magenta they are, and despill the
  *     magenta cast — eliminating the pink halo around the cut-out.
  */
@@ -146,23 +155,90 @@ export async function chromaKeyToTransparent(input: Buffer): Promise<Buffer> {
     }
   };
 
-  // Seed: every vivid-magenta pixel, wherever it sits. Border seeds catch the
-  // outer background; interior seeds catch background trapped inside the subject
-  // (e.g. the gap enclosed by a bag's handles or between an arm and the torso),
-  // which an edge-only flood could never reach. Vivid saturation is the chroma
-  // background's signature, so this stays clear of muted pink/purple garments.
-  for (let p = 0; p < n; p++) seedBorder(p);
+  const drain = () => {
+    while (stack.length > 0) {
+      const p = stack.pop()!;
+      const x = p % width;
+      const y = (p - x) / width;
+      if (x > 0) grow(p - 1);
+      if (x < width - 1) grow(p + 1);
+      if (y > 0) grow(p - width);
+      if (y < height - 1) grow(p + width);
+    }
+  };
 
-  // Flood fill outward from every seed through connected background-colour
-  // pixels, sweeping up the desaturated transition band around the subject.
-  while (stack.length > 0) {
-    const p = stack.pop()!;
-    const x = p % width;
-    const y = (p - x) / width;
-    if (x > 0) grow(p - 1);
-    if (x < width - 1) grow(p + 1);
-    if (y > 0) grow(p - width);
-    if (y < height - 1) grow(p + width);
+  // Pass 1 — the outer background. Seed only from vivid magenta on the image
+  // border (the unmistakable background) and flood inward through connected
+  // magenta-hue pixels. Because removal is edge-connected, an interior
+  // pink/purple garment that is *not* reachable from a border stays fully
+  // opaque — we never punch a hole in clothing here.
+  for (let x = 0; x < width; x++) {
+    seedBorder(x);
+    seedBorder((height - 1) * width + x);
+  }
+  for (let y = 0; y < height; y++) {
+    seedBorder(y * width);
+    seedBorder(y * width + (width - 1));
+  }
+  drain();
+
+  // Pass 2 — background trapped *inside* the subject (e.g. the gap enclosed by
+  // a bag's handle loop), which Pass 1 can't reach. Rather than keying every
+  // vivid magenta pixel (which would gouge a genuinely magenta garment), we
+  // measure the actual fill colour from the Pass-1 background and only clear
+  // enclosed pixels that match it tightly. The model paints one uniform fill,
+  // so real trapped background matches closely while a differently-shaded
+  // magenta garment does not.
+  let rs = 0, gs = 0, bs = 0, cnt = 0;
+  for (let p = 0; p < n; p++) {
+    if (state[p] !== 1) continue;
+    const o = px(p);
+    if (isSeedColor(data[o], data[o + 1], data[o + 2])) {
+      rs += data[o];
+      gs += data[o + 1];
+      bs += data[o + 2];
+      cnt++;
+    }
+  }
+  if (cnt > 0) {
+    const refR = rs / cnt;
+    const refG = gs / cnt;
+    const refB = bs / cnt;
+    const tol2 = TRAP_TOL * TRAP_TOL;
+    const matchesFill = (o: number) => {
+      const dr = data[o] - refR;
+      const dg = data[o + 1] - refG;
+      const db = data[o + 2] - refB;
+      return dr * dr + dg * dg + db * db <= tol2;
+    };
+    // Seed enclosed pixels that are vivid magenta AND match the measured fill.
+    for (let p = 0; p < n; p++) {
+      if (state[p] !== 0) continue;
+      const o = px(p);
+      if (isSeedColor(data[o], data[o + 1], data[o + 2]) && matchesFill(o)) {
+        state[p] = 1;
+        stack.push(p);
+      }
+    }
+    // Grow trapped seeds, but only through pixels that still match the fill so
+    // the clearing can't bleed out of the pocket and into the garment itself.
+    const growFill = (p: number) => {
+      if (state[p] !== 0) return;
+      const o = px(p);
+      if (isGrowColor(data[o], data[o + 1], data[o + 2]) && matchesFill(o)) {
+        state[p] = 1;
+        stack.push(p);
+      }
+    };
+    while (stack.length > 0) {
+      const p = stack.pop()!;
+      const x = p % width;
+      const y = (p - x) / width;
+      if (x > 0) growFill(p - 1);
+      if (x < width - 1) growFill(p + 1);
+      if (y > 0) growFill(p - width);
+      if (y < height - 1) growFill(p + width);
+    }
   }
 
   // Grow a bounded feather inward from the keyed region: any subject pixel that
