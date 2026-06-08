@@ -12,7 +12,7 @@ const BOX_H = 196;
 /** The mood-board photo that represents each creative direction. */
 const STYLE_IMAGES: Record<StyleId, ImageSource> = {
   editorial: require("@/assets/images/styles/editorial.png"),
-  magazine: require("@/assets/images/styles/modernist.png"),
+  magazine: require("@/assets/images/seeds/noir-grid.png"),
   pinterest: require("@/assets/images/styles/visual-diary.png"),
   scrapbook: require("@/assets/images/styles/scrapbook.png"),
   street: require("@/assets/images/styles/fashion-story.png"),

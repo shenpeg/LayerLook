@@ -1,8 +1,1 @@
-- [api-server external deps](api-server-external-deps.md) — esbuild externalizes whole scopes; add integration libs' transitive deps as DIRECT api-server deps or hit runtime ERR_MODULE_NOT_FOUND.
-- [orval schema naming collisions](orval-naming-collisions.md) — orval names zod consts from operationId+Response/Body; same-named component schema collides in the barrel — rename.
-- [mobile metro subpath imports](mobile-metro-subpath-imports.md) — don't import server libs' `/subpath` exports from Expo; Metro exports resolution is flaky cold-start — keep bundle self-contained.
-- [cut-out erase/restore brush](cutout-brush-masking.md) — no Skia on mobile; erase/restore uses react-native-svg dual-mask + view-shot snapshot; layers persist `originalUri`.
-- [gemini cut-out transparency](gemini-cutout-transparency.md) — gemini-2.5-flash-image can't emit real alpha; prompt for solid magenta bg + chroma-key server-side to transparent PNG.
-- [mobile asset URI resolution](mobile-asset-uri-resolution.md) — `Image.resolveAssetSource` throws on Expo web; use `Asset.fromModule` from expo-asset (add as direct dep) for cross-platform uri.
-- [expo-file-system on web](mobile-filesystem-web.md) — file writes/reads throw on Expo web (documentDirectory null); persistence code must fall back to data: URIs or it silently fails in preview.
-- [RN gesture-handler drag on web](rngh-web-drag.md) — draggable layers need inner <img> pointerEvents=none + userSelect/touchAction=none, else browser native image-drag hijacks Pan.
+- [Seeded sample collages](seeded-sample-collages.md) — mobile gallery seeds via CollageContext SAMPLE_SOURCES; reseed merge must stay additive-by-id to avoid wiping user-edited samples.

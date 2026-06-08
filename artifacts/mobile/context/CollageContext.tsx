@@ -13,12 +13,13 @@ import type { StyleId, FormatId } from "@/constants/styles";
 import type { Collage } from "@/lib/collage";
 
 const STORAGE_KEY = "outfit-collages-v1";
-const SEEDED_KEY = "outfit-collages-seeded-v1";
+const SEEDED_KEY = "outfit-collages-seeded-v2";
 
 /**
- * Two ready-made stories shown the first time the app is opened (before the
- * user has saved anything of their own), so the gallery never starts empty.
- * They use the bundled mood-board images as their backgrounds.
+ * Ready-made stories shown the first time the app is opened (before the user
+ * has saved anything of their own), so the gallery never starts empty. They use
+ * bundled mood-board / collage images as their backgrounds, one per creative
+ * direction.
  */
 const SAMPLE_SOURCES: {
   mod: number;
@@ -34,6 +35,26 @@ const SAMPLE_SOURCES: {
     mod: require("@/assets/images/styles/visual-diary.png") as number,
     styleId: "pinterest",
     formatId: "portrait",
+  },
+  {
+    mod: require("@/assets/images/seeds/noir-grid.png") as number,
+    styleId: "magazine",
+    formatId: "story",
+  },
+  {
+    mod: require("@/assets/images/seeds/collegiate.png") as number,
+    styleId: "editorial",
+    formatId: "story",
+  },
+  {
+    mod: require("@/assets/images/seeds/autumn.png") as number,
+    styleId: "scrapbook",
+    formatId: "story",
+  },
+  {
+    mod: require("@/assets/images/seeds/dessert.png") as number,
+    styleId: "pinterest",
+    formatId: "story",
   },
 ];
 
@@ -89,18 +110,22 @@ export function CollageProvider({ children }: { children: React.ReactNode }) {
           if (Array.isArray(parsed)) initial = parsed;
         }
 
-        // Seed the sample stories exactly once (first launch). Using a marker
-        // — rather than "is the list empty?" — means deleting the samples
-        // later won't bring them back.
+        // Seed the sample stories once per seed-set version. The merge is
+        // additive: only inject seeds whose id isn't already stored, so any
+        // existing collage — including a sample story the user has since
+        // edited (the editor autosaves under the same `sample-N` id) — is
+        // preserved untouched.
         if (!seeded) {
-          const samples = buildSampleCollages();
-          initial = [
-            ...samples,
-            ...initial.filter((c) => !c.id.startsWith("sample-")),
-          ];
-          AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(initial)).catch(
-            () => {},
+          const existingIds = new Set(initial.map((c) => c.id));
+          const missing = buildSampleCollages().filter(
+            (s) => !existingIds.has(s.id),
           );
+          if (missing.length > 0) {
+            initial = [...missing, ...initial];
+            AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(initial)).catch(
+              () => {},
+            );
+          }
           AsyncStorage.setItem(SEEDED_KEY, "1").catch(() => {});
         }
 
