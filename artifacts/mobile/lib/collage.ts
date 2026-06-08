@@ -1,4 +1,4 @@
-import { Image } from "react-native";
+import { Image, Platform } from "react-native";
 import * as FileSystem from "expo-file-system/legacy";
 
 import type { StyleId, FormatId } from "@/constants/styles";
@@ -55,17 +55,32 @@ export async function persistUri(uri: string, name: string): Promise<string> {
   }
 }
 
-/** Write a base64-encoded image to the persistent document directory. */
+/**
+ * Write a base64-encoded image to the persistent document directory.
+ * On web (where the document directory / file writes aren't available) this
+ * falls back to an inline data URI so the image is still usable.
+ */
 export async function saveBase64(base64: string, name: string): Promise<string> {
-  const dest = `${FileSystem.documentDirectory}${name}`;
-  await FileSystem.writeAsStringAsync(dest, base64, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
-  return dest;
+  const dataUri = `data:image/png;base64,${base64}`;
+  if (Platform.OS === "web" || !FileSystem.documentDirectory) return dataUri;
+  try {
+    const dest = `${FileSystem.documentDirectory}${name}`;
+    await FileSystem.writeAsStringAsync(dest, base64, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    return dest;
+  } catch {
+    return dataUri;
+  }
 }
 
 /** Read a file uri back into a base64 string (for re-sending to the API). */
 export function uriToBase64(uri: string): Promise<string> {
+  // Already an inline data URI (e.g. cut-outs saved on web): strip the prefix.
+  if (uri.startsWith("data:")) {
+    const comma = uri.indexOf(",");
+    return Promise.resolve(comma >= 0 ? uri.slice(comma + 1) : uri);
+  }
   return FileSystem.readAsStringAsync(uri, {
     encoding: FileSystem.EncodingType.Base64,
   });

@@ -46,6 +46,7 @@ import {
   type Collage,
   type Layer,
 } from "@/lib/collage";
+import { loadSampleSet } from "@/lib/sampleSet";
 
 type Phase = "empty" | "choose-bg" | "processing" | "edit";
 
@@ -81,6 +82,7 @@ export default function EditorScreen() {
   const [showText, setShowText] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [samplesLoading, setSamplesLoading] = useState(false);
 
   const [area, setArea] = useState({ w: 0, h: 0 });
   const canvasRef = useRef<View>(null);
@@ -178,6 +180,23 @@ export default function EditorScreen() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pickPhotos]);
+
+  const startWithSamples = useCallback(async () => {
+    setSamplesLoading(true);
+    try {
+      const assets = await loadSampleSet();
+      if (assets.length === 0) return;
+      setPicked(assets);
+      setPhase("choose-bg");
+    } catch {
+      Alert.alert(
+        "Couldn't load samples",
+        "Something went wrong loading the sample set. Please try again.",
+      );
+    } finally {
+      setSamplesLoading(false);
+    }
+  }, []);
 
   const cutoutFromAsset = useCallback(
     async (asset: PickedAsset, index: number): Promise<Layer | null> => {
@@ -480,6 +499,23 @@ export default function EditorScreen() {
               Pick Photos
             </Text>
           </Pressable>
+          <Pressable
+            onPress={startWithSamples}
+            disabled={samplesLoading}
+            style={[
+              styles.secondaryBtn,
+              { borderColor: colors.border, opacity: samplesLoading ? 0.6 : 1 },
+            ]}
+          >
+            {samplesLoading ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : (
+              <Feather name="layers" size={18} color={colors.foreground} />
+            )}
+            <Text style={[styles.secondaryBtnText, { color: colors.foreground }]}>
+              {samplesLoading ? "Loading sample set…" : "Try a sample set"}
+            </Text>
+          </Pressable>
         </View>
       ) : null}
 
@@ -737,6 +773,21 @@ const styles = StyleSheet.create({
   primaryBtnText: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 15,
+    letterSpacing: 0.3,
+  },
+  secondaryBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 9,
+    paddingHorizontal: 24,
+    paddingVertical: 13,
+    borderRadius: 999,
+    borderWidth: 1,
+    marginTop: 12,
+  },
+  secondaryBtnText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 14,
     letterSpacing: 0.3,
   },
 

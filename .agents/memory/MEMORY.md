@@ -4,3 +4,4 @@
 - [cut-out erase/restore brush](cutout-brush-masking.md) — no Skia on mobile; erase/restore uses react-native-svg dual-mask + view-shot snapshot; layers persist `originalUri`.
 - [gemini cut-out transparency](gemini-cutout-transparency.md) — gemini-2.5-flash-image can't emit real alpha; prompt for solid magenta bg + chroma-key server-side to transparent PNG.
 - [mobile asset URI resolution](mobile-asset-uri-resolution.md) — `Image.resolveAssetSource` throws on Expo web; use `Asset.fromModule` from expo-asset (add as direct dep) for cross-platform uri.
+- [expo-file-system on web](mobile-filesystem-web.md) — file writes/reads throw on Expo web (documentDirectory null); persistence code must fall back to data: URIs or it silently fails in preview.

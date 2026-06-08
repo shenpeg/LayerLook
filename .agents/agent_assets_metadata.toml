@@ -6,3 +6,33 @@ id = "i3brqr2vv-YIWjw1MmLht"
 uri = "file://artifacts/mobile/assets/images/icon.png"
 type = "image"
 title = "collage app icon"
+
+[[generated]]
+id = "9-R1xxt6-hAEzsJT5A3j9"
+uri = "file://artifacts/mobile/assets/images/samples/backdrop.png"
+type = "image"
+title = "editorial backdrop"
+
+[[generated]]
+id = "RgyPb3cRWqtCuAlW6wn8j"
+uri = "file://artifacts/mobile/assets/images/samples/sweater.png"
+type = "image"
+title = "knit sweater"
+
+[[generated]]
+id = "cQOown68xBATq9PgZ-L0X"
+uri = "file://artifacts/mobile/assets/images/samples/trousers.png"
+type = "image"
+title = "tailored trousers"
+
+[[generated]]
+id = "gjwJ0ik0hjw26RaypEXGG"
+uri = "file://artifacts/mobile/assets/images/samples/loafers.png"
+type = "image"
+title = "leather loafers"
+
+[[generated]]
+id = "gbE_srdGNTjwURmUrfshT"
+uri = "file://artifacts/mobile/assets/images/samples/bag.png"
+type = "image"
+title = "leather handbag"
