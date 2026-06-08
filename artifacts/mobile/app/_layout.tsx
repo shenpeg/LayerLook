@@ -13,12 +13,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { setBaseUrl } from "@workspace/api-client-react";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { SplashOverlay } from "@/components/SplashOverlay";
 import { CollageProvider } from "@/context/CollageContext";
 
 setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
@@ -46,6 +47,7 @@ export default function RootLayout() {
     CormorantGaramond_500Medium,
     CormorantGaramond_600SemiBold,
   });
+  const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -59,12 +61,15 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <GestureHandlerRootView>
+          <GestureHandlerRootView style={{ flex: 1 }}>
             <KeyboardProvider>
               <CollageProvider>
                 <RootLayoutNav />
               </CollageProvider>
             </KeyboardProvider>
+            {!splashDone ? (
+              <SplashOverlay onFinish={() => setSplashDone(true)} />
+            ) : null}
           </GestureHandlerRootView>
         </QueryClientProvider>
       </ErrorBoundary>
