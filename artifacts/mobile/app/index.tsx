@@ -42,6 +42,17 @@ export default function GalleryScreen() {
 
   const confirmDelete = useCallback(
     (item: Collage) => {
+      // React Native Web's Alert.alert doesn't render action buttons or fire
+      // their callbacks, so the in-app preview (web) needs window.confirm to
+      // actually run the delete.
+      if (Platform.OS === "web") {
+        const ok =
+          typeof window !== "undefined" && typeof window.confirm === "function"
+            ? window.confirm("Delete this collage? This can't be undone.")
+            : false;
+        if (ok) remove(item.id);
+        return;
+      }
       Alert.alert("Delete collage?", "This can't be undone.", [
         { text: "Cancel", style: "cancel" },
         {
@@ -71,7 +82,7 @@ export default function GalleryScreen() {
           onPress={() => router.push({ pathname: "/editor", params: { id: item.id } })}
           onLongPress={() => confirmDelete(item)}
         >
-          <View style={styles.cardImageWrap}>
+          <View style={[styles.cardImageWrap, { backgroundColor: colors.muted }]}>
             <CollagePreview collage={item} />
             <Pressable
               onPress={() => confirmDelete(item)}
@@ -295,7 +306,6 @@ const styles = StyleSheet.create({
     aspectRatio: 0.78,
     borderRadius: 22,
     overflow: "hidden",
-    backgroundColor: "#000",
   },
   deleteBtn: {
     position: "absolute",

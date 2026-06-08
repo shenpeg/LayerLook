@@ -217,7 +217,9 @@ export function CollageCanvas({
 const styles = StyleSheet.create({
   canvas: {
     overflow: "hidden",
-    backgroundColor: "#000",
+    // Neutral paper backdrop (not pure black) so a slow/failed background
+    // image degrades to a soft card rather than a solid black rectangle.
+    backgroundColor: "#E7E3DD",
   },
   decoFill: { ...StyleSheet.absoluteFillObject },
   staticLayer: {

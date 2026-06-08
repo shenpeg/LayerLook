@@ -241,7 +241,13 @@ export default function EditorScreen() {
       const others = assets.filter((_, i) => i !== bgIndex);
       setProgress({ done: 0, total: others.length });
 
-      const bgUri = await persistUri(bg.uri, `bg_${genId()}.jpg`);
+      // On web, the picker's blob: URL doesn't survive a reload, leaving saved
+      // stories with a dead background (a black card). Persist the background
+      // as an inline data URI on web so it always reloads.
+      const bgUri =
+        Platform.OS === "web"
+          ? `data:${bg.mime};base64,${bg.base64}`
+          : await persistUri(bg.uri, `bg_${genId()}.jpg`);
       setBackgroundUri(bgUri);
       setBackgroundAspect(bg.aspect);
 
