@@ -479,7 +479,7 @@ export default function EditorScreen() {
             </Text>
           </Pressable>
         ) : (
-          <View style={styles.headerBtn} />
+          <View style={styles.headerSpacer} />
         )}
       </View>
 
@@ -765,6 +765,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
+  },
+  headerSpacer: {
+    width: 42,
+    height: 42,
   },
   headerTitle: {
     fontFamily: "CormorantGaramond_600SemiBold",
