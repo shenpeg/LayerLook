@@ -2,3 +2,4 @@
 - [orval schema naming collisions](orval-naming-collisions.md) — orval names zod consts from operationId+Response/Body; same-named component schema collides in the barrel — rename.
 - [mobile metro subpath imports](mobile-metro-subpath-imports.md) — don't import server libs' `/subpath` exports from Expo; Metro exports resolution is flaky cold-start — keep bundle self-contained.
 - [cut-out erase/restore brush](cutout-brush-masking.md) — no Skia on mobile; erase/restore uses react-native-svg dual-mask + view-shot snapshot; layers persist `originalUri`.
+- [gemini cut-out transparency](gemini-cutout-transparency.md) — gemini-2.5-flash-image can't emit real alpha; prompt for solid magenta bg + chroma-key server-side to transparent PNG.

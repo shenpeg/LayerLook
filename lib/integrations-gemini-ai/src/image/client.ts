@@ -1,5 +1,7 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 
+import { chromaKeyToTransparent } from "./chroma-key";
+
 let _ai: GoogleGenAI | null = null;
 
 /**
@@ -59,7 +61,7 @@ export async function generateImage(
 }
 
 const REMOVE_BACKGROUND_PROMPT =
-  "Remove the background from this photo completely. Isolate the main subject — the person together with their full outfit, clothing, shoes and accessories — as a single clean cut-out. The area outside the subject must be fully transparent (alpha 0). Keep the subject's edges crisp, natural and detailed, including hair and fabric outlines. Do not add any shadow, color fill, frame, or new background. Return a PNG image with a transparent background.";
+  "Remove the original background from this photo and isolate the main subject — the person together with their full outfit, clothing, shoes and accessories — as a single clean cut-out. Place the isolated subject on a completely solid, flat, uniform pure-magenta background (hex #FF00FF, RGB 255,0,255) that fills the entire canvas edge to edge. Use this exact magenta and nothing else behind the subject — no gradients, no shadows, no other colors, no checkerboard, no white. Keep the subject's edges crisp, natural and detailed, including hair and fabric outlines. Do not recolor the subject. Return the image.";
 
 export async function removeBackground(
   imageBase64: string,
@@ -91,8 +93,15 @@ export async function removeBackground(
     throw new Error("No image data in background removal response");
   }
 
+  // The model returns the subject on a solid magenta background (it cannot
+  // reliably emit true alpha). Key that magenta out to a genuinely transparent
+  // PNG so cut-outs composite cleanly instead of showing a flat fill.
+  const keyed = await chromaKeyToTransparent(
+    Buffer.from(imagePart.inlineData.data, "base64"),
+  );
+
   return {
-    b64_json: imagePart.inlineData.data,
-    mimeType: imagePart.inlineData.mimeType || "image/png",
+    b64_json: keyed.toString("base64"),
+    mimeType: "image/png",
   };
 }
