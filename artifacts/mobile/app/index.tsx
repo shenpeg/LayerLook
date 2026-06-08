@@ -81,14 +81,14 @@ export default function GalleryScreen() {
       <View style={{ paddingTop: insets.top + WEB_TOP + 22 }}>
         <View style={styles.header}>
           <Text style={[styles.kicker, { color: colors.primary }]}>
-            OUTFIT COLLAGE · NO.01
+            LAYERLOOK · OUTFIT COLLAGE
           </Text>
           <Text style={[styles.title, { color: colors.foreground }]}>
             The Studio
           </Text>
           <Text style={[styles.lede, { color: colors.mutedForeground }]}>
-            A quiet archive of your layered looks, arranged like pages from a
-            travel journal.
+            An archive of your layered looks, turned into pages of a fashion
+            story.
           </Text>
         </View>
         <View style={[styles.rule, { backgroundColor: colors.border }]} />
