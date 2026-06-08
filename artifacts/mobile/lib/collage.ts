@@ -26,6 +26,14 @@ export interface Layer {
   z: number;
 }
 
+/** A photo selected from the picker or sample set, ready to process. */
+export interface PickedAsset {
+  uri: string;
+  base64: string;
+  mime: string;
+  aspect: number;
+}
+
 export interface Collage {
   id: string;
   backgroundUri: string;

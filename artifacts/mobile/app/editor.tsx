@@ -1,7 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { removeBackground as removeBackgroundApi } from "@workspace/api-client-react";
 import { batchProcess } from "@/lib/batch";
-import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -18,10 +17,8 @@ import React, {
 import {
   ActivityIndicator,
   Alert,
-  Animated,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -31,8 +28,12 @@ import { captureRef } from "react-native-view-shot";
 
 import { CollageCanvas } from "@/components/CollageCanvas";
 import { CutoutBrush } from "@/components/CutoutBrush";
-import { FormatBar } from "@/components/FormatBar";
-import { StyleBar } from "@/components/StyleBar";
+import { Toast } from "@/components/Toast";
+import { ChooseBackground } from "@/components/editor/ChooseBackground";
+import { EditorControls } from "@/components/editor/EditorControls";
+import { EmptyState } from "@/components/editor/EmptyState";
+import { LayerToolbar } from "@/components/editor/LayerToolbar";
+import { Processing } from "@/components/editor/Processing";
 import { FORMATS, STYLES, type FormatId, type StyleId } from "@/constants/styles";
 import { useCollages } from "@/context/CollageContext";
 import { useColors } from "@/hooks/useColors";
@@ -46,17 +47,11 @@ import {
   uriToBase64,
   type Collage,
   type Layer,
+  type PickedAsset,
 } from "@/lib/collage";
 import { loadSampleSet } from "@/lib/sampleSet";
 
 type Phase = "empty" | "choose-bg" | "processing" | "edit";
-
-interface PickedAsset {
-  uri: string;
-  base64: string;
-  mime: string;
-  aspect: number;
-}
 
 const WEB_TOP = Platform.OS === "web" ? 67 : 0;
 
@@ -74,28 +69,6 @@ export default function EditorScreen() {
   const [picked, setPicked] = useState<PickedAsset[]>([]);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [processError, setProcessError] = useState<string | null>(null);
-  const toastOpacity = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (!processError) return;
-    toastOpacity.setValue(0);
-    const useNativeDriver = Platform.OS !== "web";
-    Animated.timing(toastOpacity, {
-      toValue: 1,
-      duration: 250,
-      useNativeDriver,
-    }).start();
-    const timer = setTimeout(() => {
-      Animated.timing(toastOpacity, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver,
-      }).start(({ finished }) => {
-        if (finished) setProcessError(null);
-      });
-    }, 4000);
-    return () => clearTimeout(timer);
-  }, [processError, toastOpacity]);
 
   const [backgroundUri, setBackgroundUri] = useState("");
   const [backgroundAspect, setBackgroundAspect] = useState(1);
@@ -192,38 +165,6 @@ export default function EditorScreen() {
     return assets;
   }, []);
 
-  const startNew = useCallback(async () => {
-    const assets = await pickPhotos();
-    if (!assets || assets.length === 0) return;
-    setPicked(assets);
-    if (assets.length === 1) {
-      // Single photo: use it as background only.
-      await processCutouts(assets, 0);
-    } else {
-      setBgChoice(null);
-      setPhase("choose-bg");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pickPhotos]);
-
-  const startWithSamples = useCallback(async () => {
-    setSamplesLoading(true);
-    try {
-      const assets = await loadSampleSet();
-      if (assets.length === 0) return;
-      setPicked(assets);
-      setBgChoice(null);
-      setPhase("choose-bg");
-    } catch {
-      Alert.alert(
-        "Couldn't load samples",
-        "Something went wrong loading the sample set. Please try again.",
-      );
-    } finally {
-      setSamplesLoading(false);
-    }
-  }, []);
-
   const cutoutFromAsset = useCallback(
     async (asset: PickedAsset, index: number): Promise<Layer | null> => {
       try {
@@ -299,6 +240,37 @@ export default function EditorScreen() {
     },
     [cutoutFromAsset],
   );
+
+  const startNew = useCallback(async () => {
+    const assets = await pickPhotos();
+    if (!assets || assets.length === 0) return;
+    setPicked(assets);
+    if (assets.length === 1) {
+      // Single photo: use it as background only.
+      await processCutouts(assets, 0);
+    } else {
+      setBgChoice(null);
+      setPhase("choose-bg");
+    }
+  }, [pickPhotos, processCutouts]);
+
+  const startWithSamples = useCallback(async () => {
+    setSamplesLoading(true);
+    try {
+      const assets = await loadSampleSet();
+      if (assets.length === 0) return;
+      setPicked(assets);
+      setBgChoice(null);
+      setPhase("choose-bg");
+    } catch {
+      Alert.alert(
+        "Couldn't load samples",
+        "Something went wrong loading the sample set. Please try again.",
+      );
+    } finally {
+      setSamplesLoading(false);
+    }
+  }, []);
 
   const addMorePhotos = useCallback(async () => {
     const assets = await pickPhotos();
@@ -513,130 +485,25 @@ export default function EditorScreen() {
       </View>
 
       {phase === "empty" ? (
-        <View style={styles.center}>
-          <View style={[styles.emptyIcon, { backgroundColor: colors.secondary }]}>
-            <Feather name="image" size={32} color={colors.primary} />
-          </View>
-          <Text style={[styles.bigTitle, { color: colors.foreground }]}>
-            Choose your photos
-          </Text>
-          <Text style={[styles.sub, { color: colors.mutedForeground }]}>
-            Pick a background shot plus a few outfit photos to cut out and
-            layer.
-          </Text>
-          <Pressable
-            onPress={startNew}
-            style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
-          >
-            <Feather name="upload" size={18} color={colors.primaryForeground} />
-            <Text style={[styles.primaryBtnText, { color: colors.primaryForeground }]}>
-              Pick Photos
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={startWithSamples}
-            disabled={samplesLoading}
-            style={[
-              styles.secondaryBtn,
-              { borderColor: colors.border, opacity: samplesLoading ? 0.6 : 1 },
-            ]}
-          >
-            {samplesLoading ? (
-              <ActivityIndicator size="small" color={colors.primary} />
-            ) : (
-              <Feather name="layers" size={18} color={colors.foreground} />
-            )}
-            <Text style={[styles.secondaryBtnText, { color: colors.foreground }]}>
-              {samplesLoading ? "Loading sample set…" : "Try a sample set"}
-            </Text>
-          </Pressable>
-        </View>
+        <EmptyState
+          onPickPhotos={startNew}
+          onTrySamples={startWithSamples}
+          samplesLoading={samplesLoading}
+        />
       ) : null}
 
       {phase === "choose-bg" ? (
-        <View style={styles.chooseWrap}>
-          <Text style={[styles.bigTitle, { color: colors.foreground, textAlign: "left" }]}>
-            Pick a background
-          </Text>
-          <Text style={[styles.sub, { color: colors.mutedForeground, textAlign: "left", marginBottom: 18 }]}>
-            Tap one photo to fill the canvas. The rest become cut-out layers.
-          </Text>
-          <ScrollView contentContainerStyle={styles.grid} showsVerticalScrollIndicator={false}>
-            {picked.map((a, i) => {
-              const isChosen = bgChoice === i;
-              return (
-                <Pressable
-                  key={a.uri + i}
-                  style={[
-                    styles.gridItem,
-                    {
-                      borderColor: isChosen ? colors.primary : colors.border,
-                      borderWidth: isChosen ? 3 : 1,
-                    },
-                  ]}
-                  onPress={() => setBgChoice(i)}
-                >
-                  <Image source={{ uri: a.uri }} style={styles.gridImg} contentFit="cover" />
-                  {isChosen ? (
-                    <>
-                      <View style={[styles.pickHint, { backgroundColor: colors.primary }]}>
-                        <Feather name="check" size={14} color={colors.primaryForeground} />
-                        <Text style={[styles.pickHintText, { color: colors.primaryForeground }]}>
-                          Background
-                        </Text>
-                      </View>
-                      <View style={[styles.chosenBadge, { backgroundColor: colors.primary }]}>
-                        <Feather name="check" size={16} color={colors.primaryForeground} />
-                      </View>
-                    </>
-                  ) : null}
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-          <Pressable
-            disabled={bgChoice === null}
-            style={[
-              styles.confirmBtn,
-              {
-                backgroundColor: bgChoice === null ? colors.secondary : colors.primary,
-                opacity: bgChoice === null ? 0.6 : 1,
-              },
-            ]}
-            onPress={() => {
-              if (bgChoice !== null) processCutouts(picked, bgChoice);
-            }}
-          >
-            <Text
-              style={[
-                styles.confirmBtnText,
-                {
-                  color:
-                    bgChoice === null
-                      ? colors.mutedForeground
-                      : colors.primaryForeground,
-                },
-              ]}
-            >
-              {bgChoice === null ? "Select a background" : "Continue"}
-            </Text>
-          </Pressable>
-        </View>
+        <ChooseBackground
+          picked={picked}
+          bgChoice={bgChoice}
+          onChoose={setBgChoice}
+          onConfirm={() => {
+            if (bgChoice !== null) processCutouts(picked, bgChoice);
+          }}
+        />
       ) : null}
 
-      {phase === "processing" ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={[styles.bigTitle, { color: colors.foreground, marginTop: 20 }]}>
-            Cutting out your outfits
-          </Text>
-          <Text style={[styles.sub, { color: colors.mutedForeground }]}>
-            {progress.total > 0
-              ? `Removing backgrounds ${progress.done}/${progress.total}`
-              : "Preparing your canvas"}
-          </Text>
-        </View>
-      ) : null}
+      {phase === "processing" ? <Processing progress={progress} /> : null}
 
       {phase === "edit" ? (
         <>
@@ -667,86 +534,36 @@ export default function EditorScreen() {
           </View>
 
           {selected ? (
-            <View style={[styles.layerBar, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.layerBarContent}
-              >
-                <LayerAction icon="refresh-ccw" label="Re-cut" color={colors.foreground} onPress={rerunRemoval} />
-                <LayerAction icon="edit-2" label="Clean up" color={colors.foreground} onPress={() => setBrushLayerId(selected.id)} />
-                <LayerAction icon="copy" label="Copy" color={colors.foreground} onPress={duplicateSelected} />
-                <LayerAction icon="arrow-up" label="Forward" color={colors.foreground} onPress={bringForward} />
-                <LayerAction icon="arrow-down" label="Back" color={colors.foreground} onPress={sendBackward} />
-                <LayerAction icon="trash-2" label="Delete" color={colors.destructive} onPress={deleteSelected} />
-              </ScrollView>
-            </View>
+            <LayerToolbar
+              onRecut={rerunRemoval}
+              onCleanup={() => setBrushLayerId(selected.id)}
+              onCopy={duplicateSelected}
+              onForward={bringForward}
+              onBack={sendBackward}
+              onDelete={deleteSelected}
+            />
           ) : null}
 
-          <View style={[styles.controls, { paddingBottom: insets.bottom + 12 }]}>
-            <StyleBar value={styleId} onChange={setStyleId} />
-            <View style={{ height: 12 }} />
-            <FormatBar value={formatId} onChange={setFormatId} />
-            <View style={styles.actionRow}>
-              <Pressable
-                onPress={() => setShowText((v) => !v)}
-                style={[
-                  styles.actionBtn,
-                  { backgroundColor: showText ? colors.primary : colors.secondary },
-                ]}
-              >
-                <Feather
-                  name="type"
-                  size={18}
-                  color={showText ? colors.primaryForeground : colors.foreground}
-                />
-                <Text
-                  style={[
-                    styles.actionText,
-                    { color: showText ? colors.primaryForeground : colors.foreground },
-                  ]}
-                >
-                  Text
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={addMorePhotos}
-                style={[styles.actionBtn, { backgroundColor: colors.secondary }]}
-              >
-                <Feather name="plus" size={18} color={colors.foreground} />
-                <Text style={[styles.actionText, { color: colors.foreground }]}>Add</Text>
-              </Pressable>
-              <Pressable
-                onPress={() => handleExport("share")}
-                style={[styles.actionBtn, { backgroundColor: colors.secondary }]}
-              >
-                <Feather name="share-2" size={18} color={colors.foreground} />
-                <Text style={[styles.actionText, { color: colors.foreground }]}>Share</Text>
-              </Pressable>
-              <Pressable
-                onPress={() => handleExport("save")}
-                style={[styles.actionBtn, styles.saveBtn, { backgroundColor: colors.primary }]}
-              >
-                <Feather name="download" size={18} color={colors.primaryForeground} />
-                <Text style={[styles.actionText, { color: colors.primaryForeground }]}>Save</Text>
-              </Pressable>
-            </View>
-          </View>
+          <EditorControls
+            styleId={styleId}
+            formatId={formatId}
+            showText={showText}
+            onStyleChange={setStyleId}
+            onFormatChange={setFormatId}
+            onToggleText={() => setShowText((v) => !v)}
+            onAddPhotos={addMorePhotos}
+            onShare={() => handleExport("share")}
+            onSave={() => handleExport("save")}
+          />
         </>
       ) : null}
 
       {processError ? (
-        <Animated.View
-          style={[
-            styles.toast,
-            { backgroundColor: colors.foreground, bottom: insets.bottom + 200, opacity: toastOpacity },
-          ]}
-        >
-          <Pressable onPress={() => setProcessError(null)} style={styles.toastInner}>
-            <Text style={styles.toastText}>{processError}</Text>
-            <Text style={styles.toastDismiss}>Tap to dismiss</Text>
-          </Pressable>
-        </Animated.View>
+        <Toast
+          message={processError}
+          onDismiss={() => setProcessError(null)}
+          bottom={insets.bottom + 200}
+        />
       ) : null}
 
       {brushLayer ? (
@@ -764,25 +581,6 @@ export default function EditorScreen() {
         </View>
       ) : null}
     </View>
-  );
-}
-
-function LayerAction({
-  icon,
-  label,
-  color,
-  onPress,
-}: {
-  icon: React.ComponentProps<typeof Feather>["name"];
-  label: string;
-  color: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable style={styles.layerAction} onPress={onPress} hitSlop={6}>
-      <Feather name={icon} size={20} color={color} />
-      <Text style={[styles.layerActionText, { color }]}>{label}</Text>
-    </Pressable>
   );
 }
 
@@ -823,179 +621,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     letterSpacing: 0.3,
   },
-
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 40,
-  },
-  emptyIcon: {
-    width: 78,
-    height: 78,
-    borderRadius: 39,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 22,
-  },
-  bigTitle: {
-    fontFamily: "CormorantGaramond_600SemiBold",
-    fontSize: 30,
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  sub: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 15,
-    lineHeight: 23,
-    textAlign: "center",
-  },
-  primaryBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 9,
-    paddingHorizontal: 28,
-    paddingVertical: 15,
-    borderRadius: 999,
-    marginTop: 28,
-  },
-  primaryBtnText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 15,
-    letterSpacing: 0.3,
-  },
-  secondaryBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 9,
-    paddingHorizontal: 24,
-    paddingVertical: 13,
-    borderRadius: 999,
-    borderWidth: 1,
-    marginTop: 12,
-  },
-  secondaryBtnText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
-    letterSpacing: 0.3,
-  },
-
-  chooseWrap: { flex: 1, paddingHorizontal: 20, paddingTop: 6 },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-    paddingBottom: 30,
-  },
-  gridItem: {
-    width: "47%",
-    aspectRatio: 0.8,
-    borderRadius: 22,
-    overflow: "hidden",
-    borderWidth: 1,
-  },
-  gridImg: { flex: 1 },
-  pickHint: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 8,
-  },
-  pickHintText: { fontFamily: "Inter_600SemiBold", fontSize: 12 },
-  chosenBadge: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  confirmBtn: {
-    borderRadius: 30,
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 12,
-  },
-  confirmBtnText: { fontFamily: "Inter_600SemiBold", fontSize: 16 },
-
   stage: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     padding: 12,
-  },
-  layerBar: {
-    marginHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 22,
-    borderWidth: 1,
-    marginBottom: 10,
-  },
-  layerBarContent: {
-    flexGrow: 1,
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    paddingHorizontal: 8,
-    gap: 8,
-  },
-  layerAction: { alignItems: "center", gap: 4, minWidth: 56 },
-  layerActionText: { fontFamily: "Inter_500Medium", fontSize: 11 },
-
-  controls: { paddingTop: 14 },
-  actionRow: {
-    flexDirection: "row",
-    gap: 10,
-    paddingHorizontal: 16,
-    marginTop: 14,
-  },
-  actionBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: 18,
-  },
-  saveBtn: { flex: 1.3 },
-  actionText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
-    letterSpacing: 0.2,
-  },
-
-  toast: {
-    position: "absolute",
-    left: 24,
-    right: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-  },
-  toastInner: {
-    alignItems: "center",
-  },
-  toastText: {
-    color: "#fff",
-    fontFamily: "Inter_500Medium",
-    fontSize: 13,
-    textAlign: "center",
-  },
-  toastDismiss: {
-    color: "rgba(255,255,255,0.6)",
-    fontFamily: "Inter_500Medium",
-    fontSize: 11,
-    textAlign: "center",
-    marginTop: 4,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
