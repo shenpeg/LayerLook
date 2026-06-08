@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AboutModal } from "@/components/AboutModal";
 import { CollagePreview } from "@/components/CollagePreview";
 import { DirectionPreview } from "@/components/DirectionPreview";
 import { useCollages } from "@/context/CollageContext";
@@ -37,6 +38,7 @@ export default function GalleryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { collages, loaded, remove } = useCollages();
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   const confirmDelete = useCallback(
     (item: Collage) => {
@@ -97,9 +99,21 @@ export default function GalleryScreen() {
   const listHeader = (
     <View style={{ paddingTop: insets.top + WEB_TOP + 22 }}>
       <View style={styles.header}>
-        <Text style={[styles.kicker, { color: colors.primary }]}>
-          LAYERLOOK · OUTFIT COLLAGE
-        </Text>
+        <View style={styles.headerTop}>
+          <Text style={[styles.kicker, { color: colors.primary }]}>
+            LAYERLOOK · OUTFIT COLLAGE
+          </Text>
+          <Pressable
+            onPress={() => setAboutOpen(true)}
+            hitSlop={10}
+            style={({ pressed }) => [
+              styles.infoBtn,
+              { borderColor: colors.border, opacity: pressed ? 0.6 : 1 },
+            ]}
+          >
+            <Feather name="info" size={16} color={colors.mutedForeground} />
+          </Pressable>
+        </View>
         <Text style={[styles.title, { color: colors.foreground }]}>
           The Studio
         </Text>
@@ -196,6 +210,8 @@ export default function GalleryScreen() {
           New Collage
         </Text>
       </Pressable>
+
+      <AboutModal visible={aboutOpen} onClose={() => setAboutOpen(false)} />
     </View>
   );
 }
@@ -205,6 +221,19 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 24,
     paddingBottom: 18,
+  },
+  headerTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  infoBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   kicker: {
     fontFamily: "Inter_600SemiBold",
