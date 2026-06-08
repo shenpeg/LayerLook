@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import React from "react";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
@@ -125,6 +125,7 @@ export function DraggableLayer({
             shadowOpacity: style.shadow.opacity,
             shadowOffset: { width: 0, height: style.shadow.offsetY },
           },
+          editable ? webDragStyle : null,
           animStyle,
         ]}
       >
@@ -132,6 +133,7 @@ export function DraggableLayer({
           source={{ uri: layer.uri }}
           style={styles.img}
           contentFit="contain"
+          pointerEvents="none"
         />
         {selected && editable ? (
           <Animated.View
@@ -143,6 +145,15 @@ export function DraggableLayer({
     </GestureDetector>
   );
 }
+
+// On web, stop the browser's native image drag / text selection from
+// hijacking the pointer so layers follow the mouse cleanly, and show a grab
+// cursor as an affordance.
+const webDragStyle = (
+  Platform.OS === "web"
+    ? { userSelect: "none", cursor: "grab", touchAction: "none" }
+    : null
+) as Record<string, string> | null;
 
 const styles = StyleSheet.create({
   layer: {
