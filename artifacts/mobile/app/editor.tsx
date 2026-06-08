@@ -83,6 +83,7 @@ export default function EditorScreen() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [samplesLoading, setSamplesLoading] = useState(false);
+  const [bgChoice, setBgChoice] = useState<number | null>(null);
 
   const [area, setArea] = useState({ w: 0, h: 0 });
   const canvasRef = useRef<View>(null);
@@ -176,6 +177,7 @@ export default function EditorScreen() {
       // Single photo: use it as background only.
       await processCutouts(assets, 0);
     } else {
+      setBgChoice(null);
       setPhase("choose-bg");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -187,6 +189,7 @@ export default function EditorScreen() {
       const assets = await loadSampleSet();
       if (assets.length === 0) return;
       setPicked(assets);
+      setBgChoice(null);
       setPhase("choose-bg");
     } catch {
       Alert.alert(
@@ -258,7 +261,9 @@ export default function EditorScreen() {
       setLayers(newLayers);
       if (failures > 0) {
         setProcessError(
-          `${failures} photo${failures > 1 ? "s" : ""} couldn't be cut out and were skipped.`,
+          failures > 1
+            ? `${failures} photos couldn't be cut out and were skipped.`
+            : `1 photo couldn't be cut out and was skipped.`,
         );
       }
       setPhase("edit");
@@ -525,25 +530,68 @@ export default function EditorScreen() {
             Pick a background
           </Text>
           <Text style={[styles.sub, { color: colors.mutedForeground, textAlign: "left", marginBottom: 18 }]}>
-            This photo fills the canvas. The rest become cut-out layers.
+            Tap one photo to fill the canvas. The rest become cut-out layers.
           </Text>
           <ScrollView contentContainerStyle={styles.grid} showsVerticalScrollIndicator={false}>
-            {picked.map((a, i) => (
-              <Pressable
-                key={a.uri + i}
-                style={[styles.gridItem, { borderColor: colors.border }]}
-                onPress={() => processCutouts(picked, i)}
-              >
-                <Image source={{ uri: a.uri }} style={styles.gridImg} contentFit="cover" />
-                <View style={[styles.pickHint, { backgroundColor: colors.primary }]}>
-                  <Feather name="check" size={14} color={colors.primaryForeground} />
-                  <Text style={[styles.pickHintText, { color: colors.primaryForeground }]}>
-                    Use as background
-                  </Text>
-                </View>
-              </Pressable>
-            ))}
+            {picked.map((a, i) => {
+              const isChosen = bgChoice === i;
+              return (
+                <Pressable
+                  key={a.uri + i}
+                  style={[
+                    styles.gridItem,
+                    {
+                      borderColor: isChosen ? colors.primary : colors.border,
+                      borderWidth: isChosen ? 3 : 1,
+                    },
+                  ]}
+                  onPress={() => setBgChoice(i)}
+                >
+                  <Image source={{ uri: a.uri }} style={styles.gridImg} contentFit="cover" />
+                  {isChosen ? (
+                    <>
+                      <View style={[styles.pickHint, { backgroundColor: colors.primary }]}>
+                        <Feather name="check" size={14} color={colors.primaryForeground} />
+                        <Text style={[styles.pickHintText, { color: colors.primaryForeground }]}>
+                          Background
+                        </Text>
+                      </View>
+                      <View style={[styles.chosenBadge, { backgroundColor: colors.primary }]}>
+                        <Feather name="check" size={16} color={colors.primaryForeground} />
+                      </View>
+                    </>
+                  ) : null}
+                </Pressable>
+              );
+            })}
           </ScrollView>
+          <Pressable
+            disabled={bgChoice === null}
+            style={[
+              styles.confirmBtn,
+              {
+                backgroundColor: bgChoice === null ? colors.secondary : colors.primary,
+                opacity: bgChoice === null ? 0.6 : 1,
+              },
+            ]}
+            onPress={() => {
+              if (bgChoice !== null) processCutouts(picked, bgChoice);
+            }}
+          >
+            <Text
+              style={[
+                styles.confirmBtnText,
+                {
+                  color:
+                    bgChoice === null
+                      ? colors.mutedForeground
+                      : colors.primaryForeground,
+                },
+              ]}
+            >
+              {bgChoice === null ? "Select a background" : "Continue"}
+            </Text>
+          </Pressable>
         </View>
       ) : null}
 
@@ -818,6 +866,24 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   pickHintText: { fontFamily: "Inter_600SemiBold", fontSize: 12 },
+  chosenBadge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  confirmBtn: {
+    borderRadius: 30,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  confirmBtnText: { fontFamily: "Inter_600SemiBold", fontSize: 16 },
 
   stage: {
     flex: 1,
