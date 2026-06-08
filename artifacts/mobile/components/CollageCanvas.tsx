@@ -16,9 +16,55 @@ interface Props {
   editable: boolean;
   showText: boolean;
   selectedId: string | null;
+  /**
+   * Render layers as plain, non-interactive images (no gestures / reanimated).
+   * Use for lightweight previews like gallery cards.
+   */
+  staticRender?: boolean;
   innerRef?: React.Ref<View>;
   onSelect?: (id: string | null) => void;
   onChange?: (id: string, update: Partial<Layer>) => void;
+}
+
+function StaticLayer({
+  layer,
+  canvasWidth,
+  canvasHeight,
+  style,
+}: {
+  layer: Layer;
+  canvasWidth: number;
+  canvasHeight: number;
+  style: StyleConfig;
+}) {
+  const baseWidth = layer.widthFrac * canvasWidth;
+  const baseHeight = baseWidth / layer.aspectRatio;
+  return (
+    <View
+      pointerEvents="none"
+      style={[
+        styles.staticLayer,
+        {
+          width: baseWidth,
+          height: baseHeight,
+          marginLeft: -baseWidth / 2,
+          marginTop: -baseHeight / 2,
+          shadowColor: style.shadow.color,
+          shadowRadius: style.shadow.radius,
+          shadowOpacity: style.shadow.opacity,
+          shadowOffset: { width: 0, height: style.shadow.offsetY },
+          transform: [
+            { translateX: layer.xFrac * canvasWidth },
+            { translateY: layer.yFrac * canvasHeight },
+            { scale: layer.scale },
+            { rotateZ: `${layer.rotation}rad` },
+          ],
+        },
+      ]}
+    >
+      <Image source={{ uri: layer.uri }} style={styles.img} contentFit="contain" />
+    </View>
+  );
 }
 
 function Decoration({ style, config }: { style: StyleId; config: StyleConfig }) {
@@ -93,6 +139,7 @@ export function CollageCanvas({
   editable,
   showText,
   selectedId,
+  staticRender,
   innerRef,
   onSelect,
   onChange,
@@ -127,20 +174,30 @@ export function CollageCanvas({
         />
       ) : null}
 
-      {ordered.map((layer) => (
-        <DraggableLayer
-          key={`${layer.id}-${width.toFixed(0)}-${height.toFixed(0)}-${styleId}`}
-          layer={layer}
-          canvasWidth={width}
-          canvasHeight={height}
-          selected={selectedId === layer.id}
-          editable={editable}
-          style={config}
-          selectColor={config.accent === "#F2E641" ? "#FFFFFF" : config.accent}
-          onSelect={(id) => onSelect?.(id)}
-          onChange={(id, u) => onChange?.(id, u)}
-        />
-      ))}
+      {ordered.map((layer) =>
+        staticRender ? (
+          <StaticLayer
+            key={`${layer.id}-${width.toFixed(0)}-${height.toFixed(0)}-${styleId}`}
+            layer={layer}
+            canvasWidth={width}
+            canvasHeight={height}
+            style={config}
+          />
+        ) : (
+          <DraggableLayer
+            key={`${layer.id}-${width.toFixed(0)}-${height.toFixed(0)}-${styleId}`}
+            layer={layer}
+            canvasWidth={width}
+            canvasHeight={height}
+            selected={selectedId === layer.id}
+            editable={editable}
+            style={config}
+            selectColor={config.accent === "#F2E641" ? "#FFFFFF" : config.accent}
+            onSelect={(id) => onSelect?.(id)}
+            onChange={(id, u) => onChange?.(id, u)}
+          />
+        ),
+      )}
 
       {showText ? <Decoration style={styleId} config={config} /> : null}
 
@@ -163,6 +220,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
   },
   decoFill: { ...StyleSheet.absoluteFillObject },
+  staticLayer: {
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+  },
+  img: {
+    width: "100%",
+    height: "100%",
+  },
 
   editorialTop: {
     position: "absolute",

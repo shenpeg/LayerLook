@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback } from "react";
@@ -15,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { CollagePreview } from "@/components/CollagePreview";
 import { DirectionPreview } from "@/components/DirectionPreview";
 import { useCollages } from "@/context/CollageContext";
 import { STYLES, type StyleId } from "@/constants/styles";
@@ -54,7 +54,6 @@ export default function GalleryScreen() {
 
   const renderItem = useCallback(
     ({ item, index }: { item: Collage; index: number }) => {
-      const thumb = item.thumbnailUri ?? item.backgroundUri;
       // Gentle asymmetry: nudge alternating columns to feel hand-placed.
       const offset = index % 2 === 0 ? 0 : 18;
       return (
@@ -71,7 +70,17 @@ export default function GalleryScreen() {
           onLongPress={() => confirmDelete(item)}
         >
           <View style={styles.cardImageWrap}>
-            <Image source={{ uri: thumb }} style={styles.cardImage} contentFit="cover" />
+            <CollagePreview collage={item} />
+            <Pressable
+              onPress={() => confirmDelete(item)}
+              hitSlop={8}
+              style={({ pressed }) => [
+                styles.deleteBtn,
+                { opacity: pressed ? 0.7 : 1 },
+              ]}
+            >
+              <Feather name="trash-2" size={15} color="#FFFFFF" />
+            </Pressable>
           </View>
           <View style={styles.cardMeta}>
             <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
@@ -257,8 +266,19 @@ const styles = StyleSheet.create({
     aspectRatio: 0.78,
     borderRadius: 22,
     overflow: "hidden",
+    backgroundColor: "#000",
   },
-  cardImage: { flex: 1 },
+  deleteBtn: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.55)",
+  },
   cardMeta: {
     flexDirection: "row",
     alignItems: "center",
