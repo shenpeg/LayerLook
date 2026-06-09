@@ -4,7 +4,7 @@ LayerLook is an AI-powered fashion storytelling tool that helps creators transfo
 
 Built by **Team Laputa** (Peggy Shen & Bernice Sun) for the **UPSCALE Conference Hackathon — June 2026**.
 
-🎥 **Final Demo:** https://youtu.be/CXgJGgeyQAk
+🎥 **Final V2 Demo:** https://youtu.be/yngMoPg11wM
 
 🎥 **V1 Demo:** https://drive.google.com/file/d/1Qis1on8kP9NqD5IxHLb1cjAEuQYwNKQO/view?usp=sharing
 
