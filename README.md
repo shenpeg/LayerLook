@@ -41,19 +41,11 @@ Users can:
 2. Choose a creative direction
 3. Generate a polished fashion composition
 
-Creative directions include:
-
-* Editorial
-* Scrapbook
-* Visual Diary
-* Modernist
-* Fashion Story
-
 The same outfit can be interpreted through multiple visual styles, helping creators quickly explore different aesthetics.
 
 ---
 
-## Features
+## How it works
 
 ### Fashion Story Generation
 
@@ -66,7 +58,6 @@ Automatically isolate fashion subjects using Google Gemini-powered image process
 ### Multiple Creative Directions
 
 Generate stylistically distinct outputs:
-
 * Editorial magazine layouts
 * Scrapbook collages
 * Visual journals
@@ -76,7 +67,6 @@ Generate stylistically distinct outputs:
 ### Social Media Optimization
 
 Designed for content formats such as:
-
 * Instagram Stories
 * Outfit recaps
 * Fashion moodboards
@@ -87,7 +77,6 @@ Designed for content formats such as:
 ## Tech Stack
 
 ### Replit
-
 Used for:
 * rapid prototyping
 * frontend development
@@ -95,62 +84,23 @@ Used for:
 * full-stack workflow
 
 ### Google Gemini
-
 Used for:
 * image processing
 * background removal
 * transparent cutout generation
 
 ### Future Directions
-
 #### Alibaba Cloud
-
 Potential applications:
 * fashion image understanding
-* garment recognition
-* accessory detection
-* image segmentation
+* garment recognition, accessory detection, image segmentation
 * style analysis
 
 #### Magnific
-
 Potential applications:
-* image enhancement
-* upscaling
+* image enhancement, upscaling
 * texture refinement
 * editorial-quality output polishing
-
----
-
-## How It Works
-
-### 1. Upload Assets
-
-Upload:
-* outfit photos
-* fit checks
-* accessories
-* Pinterest references
-* fashion inspiration
-
-### 2. Choose a Creative Direction
-
-Select a style such as:
-* Editorial
-* Scrapbook
-* Fashion Story
-
-### 3. Generate
-
-LayerLook:
-* removes backgrounds
-* extracts visual assets
-* arranges compositions
-* generates a social-ready story
-
-### 4. Export
-
-Share your visual story to your platform of choice.
 
 ---
 
