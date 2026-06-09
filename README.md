@@ -1,14 +1,11 @@
-# LayerLook 👗 Fit checks -> social-ready fashion stories.
+# LayerLook 👗
 
 LayerLook is an AI-powered fashion storytelling tool that helps creators transform outfit photos, accessories, fit checks, and fashion references into polished editorial-style collages optimized for social media. Built during the UPSCALE Conference Hackathon.
 
-## 🎥 Video Demos
+Built by **Team Laputa** (Peggy Shen & Bernice Sun) for the **UPSCALE Conference Hackathon — June 2026**.
 
-#### Final Submission (V2)
-https://youtu.be/CXgJGgeyQAk
-
-#### Initial Submission (V1)
-https://drive.google.com/file/d/1Qis1on8kP9NqD5IxHLb1cjAEuQYwNKQO/view?usp=sharing
+🎥 **Final Demo:** https://youtu.be/CXgJGgeyQAk
+🎥 **V1 Demo:** https://drive.google.com/file/d/1Qis1on8kP9NqD5IxHLb1cjAEuQYwNKQO/view?usp=sharing
 
 ---
 
