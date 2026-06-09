@@ -1,4 +1,4 @@
-# LayerLook 👗 Turn fit checks into social-ready fashion stories.
+# LayerLook 👗 Fit checks -> social-ready fashion stories.
 
 LayerLook is an AI-powered fashion storytelling tool that helps creators transform outfit photos, accessories, fit checks, and fashion references into polished editorial-style collages optimized for social media. Built during the UPSCALE Conference Hackathon.
 
