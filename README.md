@@ -1,19 +1,13 @@
-# LayerLook 👗✨
+# LayerLook 👗 Turn outfit photos into social-ready fashion stories.
 
-Turn outfit photos into social-ready fashion stories.
+LayerLook is an AI-powered fashion storytelling tool that helps creators transform outfit photos, accessories, fit checks, and fashion references into polished editorial-style collages optimized for social media. Built during the UPSCALE Conference Hackathon.
 
-LayerLook is an AI-powered fashion storytelling tool that helps creators transform outfit photos, accessories, fit checks, and fashion references into polished editorial-style collages optimized for social media.
+## 🎥 Video Demos
 
-Built during the **UPSCALE AI Conference Hackathon (June 2026)** by **Team Laputa**.
-
-## 🎥 Demo
-
-### Final Submission (V2)
-
+#### Final Submission (V2)
 https://youtu.be/CXgJGgeyQAk
 
-### Initial Submission (V1)
-
+#### Initial Submission (V1)
 https://drive.google.com/file/d/1Qis1on8kP9NqD5IxHLb1cjAEuQYwNKQO/view?usp=sharing
 
 ---
@@ -23,7 +17,6 @@ https://drive.google.com/file/d/1Qis1on8kP9NqD5IxHLb1cjAEuQYwNKQO/view?usp=shari
 Fashion creators spend a surprising amount of time creating visual stories.
 
 A typical Instagram Story outfit collage might require:
-
 * collecting outfit photos
 * gathering Pinterest references
 * removing backgrounds
@@ -96,7 +89,6 @@ Designed for content formats such as:
 ### Replit
 
 Used for:
-
 * rapid prototyping
 * frontend development
 * deployment
@@ -105,7 +97,6 @@ Used for:
 ### Google Gemini
 
 Used for:
-
 * image processing
 * background removal
 * transparent cutout generation
@@ -115,7 +106,6 @@ Used for:
 #### Alibaba Cloud
 
 Potential applications:
-
 * fashion image understanding
 * garment recognition
 * accessory detection
@@ -125,7 +115,6 @@ Potential applications:
 #### Magnific
 
 Potential applications:
-
 * image enhancement
 * upscaling
 * texture refinement
@@ -138,7 +127,6 @@ Potential applications:
 ### 1. Upload Assets
 
 Upload:
-
 * outfit photos
 * fit checks
 * accessories
@@ -148,7 +136,6 @@ Upload:
 ### 2. Choose a Creative Direction
 
 Select a style such as:
-
 * Editorial
 * Scrapbook
 * Fashion Story
@@ -156,7 +143,6 @@ Select a style such as:
 ### 3. Generate
 
 LayerLook:
-
 * removes backgrounds
 * extracts visual assets
 * arranges compositions
@@ -168,25 +154,13 @@ Share your visual story to your platform of choice.
 
 ---
 
-## Team
-
-### Peggy Shen
-
-Product Design • UX/UI • Engineering
-
-### Bernice Sun
-
-Product Design • Visual Design • Fashion Creator Research
-
-Team: **Laputa**
-
----
-
 ## Built At
 
 UPSCALE AI Conference Hackathon
 San Francisco, California
 June 2026
+
+Made by Bernice Sun and Peggy Shen.
 
 ---
 
