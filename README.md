@@ -5,24 +5,18 @@ LayerLook is an AI-powered fashion storytelling tool that helps creators transfo
 Built by **Team Laputa** (Peggy Shen & Bernice Sun) for the **UPSCALE Conference Hackathon — June 2026**.
 
 🎥 **Final Demo:** https://youtu.be/CXgJGgeyQAk
+
 🎥 **V1 Demo:** https://drive.google.com/file/d/1Qis1on8kP9NqD5IxHLb1cjAEuQYwNKQO/view?usp=sharing
 
 ---
 
 ## The Problem
 
-Fashion creators spend a surprising amount of time creating visual stories.
+Fashion creators spend a surprising amount of time manually creating outfit collages and story posts.
 
-A typical Instagram Story outfit collage might require:
-* collecting outfit photos
-* gathering Pinterest references
-* removing backgrounds
-* cutting out accessories
-* arranging layouts
-* resizing for social platforms
-* experimenting with aesthetics
+A typical workflow involves collecting outfit photos, removing backgrounds, cutting out accessories, arranging layouts, resizing assets, and experimenting with aesthetics until everything feels ready to post.
 
-While collecting inspiration is easy, turning that inspiration into a polished post is still largely manual.
+While collecting inspiration is fun, turning that inspiration into a polished post is still largely manual.
 
 LayerLook helps bridge that gap.
 
